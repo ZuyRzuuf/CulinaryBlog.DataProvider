@@ -6,6 +6,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipesDataProvider.API.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipesDataProvider.API.Test.Integration", "test\RecipesDataProvider.API.Test.Integration\RecipesDataProvider.API.Test.Integration.csproj", "{4045DDAE-7AA6-45E6-A938-2EC46AE86274}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipesDataProvider.Domain", "src\RecipesDataProvider.Domain\RecipesDataProvider.Domain.csproj", "{49603611-38F6-4A52-BE43-77E49E9D4A8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipesDataProvider.Domain.Test.Unit", "test\RecipesDataProvider.Domain.Test.Unit\RecipesDataProvider.Domain.Test.Unit.csproj", "{AC4E8A9D-CB67-4BE3-965F-2E90E96B18DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecipesDataProvider.Domain.Test.Integration", "test\RecipesDataProvider.Domain.Test.Integration\RecipesDataProvider.Domain.Test.Integration.csproj", "{146041C5-3C8D-4791-B187-C5448402F8F0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +30,17 @@ Global
 		{4045DDAE-7AA6-45E6-A938-2EC46AE86274}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4045DDAE-7AA6-45E6-A938-2EC46AE86274}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4045DDAE-7AA6-45E6-A938-2EC46AE86274}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49603611-38F6-4A52-BE43-77E49E9D4A8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49603611-38F6-4A52-BE43-77E49E9D4A8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49603611-38F6-4A52-BE43-77E49E9D4A8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49603611-38F6-4A52-BE43-77E49E9D4A8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC4E8A9D-CB67-4BE3-965F-2E90E96B18DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC4E8A9D-CB67-4BE3-965F-2E90E96B18DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC4E8A9D-CB67-4BE3-965F-2E90E96B18DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC4E8A9D-CB67-4BE3-965F-2E90E96B18DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{146041C5-3C8D-4791-B187-C5448402F8F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{146041C5-3C8D-4791-B187-C5448402F8F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{146041C5-3C8D-4791-B187-C5448402F8F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{146041C5-3C8D-4791-B187-C5448402F8F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
