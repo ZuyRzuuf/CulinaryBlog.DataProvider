@@ -22,4 +22,9 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\RecipesDataProvider.Domain\RecipesDataProvider.Domain.csproj" />
+      <ProjectReference Include="..\..\src\RecipesDataProvider.Infrastructure\RecipesDataProvider.Infrastructure.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -1,6 +1,14 @@
+using Dapper;
+using RecipesDataProvider.Infrastructure;
+using RecipesDataProvider.Infrastructure.Database;
+using RecipesDataProvider.Infrastructure.Helpers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSingleton<MysqlContext>();
+builder.Services.AddInfrastructureServices();
+SqlMapper.AddTypeHandler(new MySqlGuidTypeHandler());
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
