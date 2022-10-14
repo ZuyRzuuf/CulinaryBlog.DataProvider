@@ -9,6 +9,8 @@
 
     <ItemGroup>
         <PackageReference Include="FluentAssertions" Version="6.7.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="6.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
         <PackageReference Include="Moq" Version="4.18.2" />
@@ -24,7 +26,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\RecipesDataProvider.API\RecipesDataProvider.API.csproj" />
+      <ProjectReference Include="..\..\src\RecipesDataProvider.Domain\RecipesDataProvider.Domain.csproj" />
+      <ProjectReference Include="..\..\src\RecipesDataProvider.Infrastructure\RecipesDataProvider.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

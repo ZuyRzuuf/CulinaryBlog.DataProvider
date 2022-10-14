@@ -1,6 +1,25 @@
+using System.Reflection;
+using Dapper;
+using FluentMigrator.Runner;
+using RecipesDataProvider.Extensions;
+using RecipesDataProvider.Infrastructure;
+using RecipesDataProvider.Infrastructure.Database;
+using RecipesDataProvider.Infrastructure.Helpers;
+using RecipesDataProvider.Migrations;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSingleton<MysqlContext>();
+builder.Services.AddSingleton<Database>();
+builder.Services.AddInfrastructureServices();
+SqlMapper.AddTypeHandler(new MySqlGuidTypeHandler());
+// register Fluent Migrator
+builder.Services.AddLogging(l => l.AddFluentMigratorConsole())
+    .AddFluentMigratorCore()
+    .ConfigureRunner(c => c.AddMySql5()
+        .WithGlobalConnectionString(builder.Configuration.GetConnectionString("local"))
+        .ScanIn(Assembly.GetExecutingAssembly()).For.Migrations());
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -22,4 +41,13 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// start Fluent Migrator migrations
+app.MigrateDatabase();
+
 app.Run();
+
+// used for integration test configuration
+// based on https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-6.0
+public partial class Program
+{
+}
