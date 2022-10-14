@@ -8,6 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="FluentMigrator" Version="3.3.2" />
+        <PackageReference Include="FluentMigrator.Runner" Version="3.3.2" />
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     </ItemGroup>
@@ -27,9 +29,10 @@
         used for integration test configuration
         based on https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-6.0
     -->
-    <!--
     <ItemGroup>
         <InternalsVisibleTo Include="RecipesDataProvider.Infrastructure.Test.Integration" />
     </ItemGroup>
-    -->
+    <ItemGroup>
+      <Folder Include="Migrations\Tables" />
+    </ItemGroup>
 </Project>
