@@ -1,6 +1,6 @@
 using FluentMigrator;
 
-namespace RecipesDataProvider.Migrations;
+namespace RecipesDataProvider.API.Migrations;
 
 [Migration(202210111943)]
 public class M_20221011_1943_Add_Table_Recipe : Migration

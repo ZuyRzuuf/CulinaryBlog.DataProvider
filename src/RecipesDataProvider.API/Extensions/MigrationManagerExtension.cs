@@ -1,14 +1,14 @@
 using FluentMigrator.Runner;
-using RecipesDataProvider.Migrations;
+using RecipesDataProvider.API.Migrations;
 
-namespace RecipesDataProvider.Extensions;
+namespace RecipesDataProvider.API.Extensions;
 
 public static class MigrationManagerExtension
 {
     public static IHost MigrateDatabase(this IHost host)
     {
         using var scope = host.Services.CreateScope();
-        var databaseService = scope.ServiceProvider.GetRequiredService<Database>();
+        var databaseService = scope.ServiceProvider.GetRequiredService<RecipesDatabase>();
         var migrationService = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
 
         databaseService.Create("culinary_blog");

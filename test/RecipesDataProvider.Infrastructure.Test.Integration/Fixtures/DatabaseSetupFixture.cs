@@ -1,53 +1,39 @@
 using System.IO;
 using System.Threading.Tasks;
+using FluentMigrator.Runner;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
+using RecipesDataProvider.Infrastructure.Database;
+using RecipesDataProvider.API.Migrations;
 using Xunit;
 
 namespace RecipesDataProvider.Infrastructure.Test.Integration.Fixtures;
 
 public class DatabaseSetupFixture : IAsyncLifetime
 {
-    private const string InitScriptPath = "database_create.sql";
+    private readonly string _connectionString;
+    private readonly ServiceProvider _serviceProvider;
+    private readonly IConfiguration _configuration;
+    private readonly MysqlContext _mysqlContext;
+
     private const string DatabaseName = "culinary_blog_test";
     
-    private readonly string _directory;
-    private readonly string _connectionString;
-
     public string ConnectionString => _connectionString;
+    public MysqlContext MysqlTestContext => _mysqlContext;
 
     public DatabaseSetupFixture()
     {
-        _directory = Directory.GetCurrentDirectory();
-        _connectionString = $"server=localhost;port=8084;userid=test;password=test;database={DatabaseName};";
-        // _connectionString = $"server=localhost;port=8083;userid=root;password=root;database=culinary_blog;";
+        _configuration = ConfigurationProvider();
+        _mysqlContext = new MysqlContext(_configuration);
+        _connectionString = $"{_configuration.GetConnectionString("local")};database={DatabaseName}";
+        _serviceProvider = ServicesProvider();
     }
 
     public async Task InitializeAsync()
     {
-        await using var connection = new MySqlConnection(_connectionString);
-
-        await connection.OpenAsync();
-
-        try
-        {
-            var script = new MySqlScript(connection)
-            {
-                Query = await File.ReadAllTextAsync($"{_directory}/{InitScriptPath}")
-            };
-            
-            script.Error += async (_, args) =>
-            {
-                // try to drop database on error
-                await DisposeAsync();
-                throw args.Exception;
-            };
-
-            await script.ExecuteAsync();
-        }
-        finally
-        {
-            await connection.CloseAsync();
-        }
+        CreateTestDatabase();
+        RunMigrations();
     }
 
     public async Task DisposeAsync()
@@ -66,5 +52,47 @@ public class DatabaseSetupFixture : IAsyncLifetime
         {
             await connection.CloseAsync();
         }
+    }
+
+    private static IConfiguration ConfigurationProvider()
+    {
+        return new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile(@"appsettings.test.json", false, false)
+            .AddEnvironmentVariables()
+            .Build();
+    }
+    
+    private ServiceProvider ServicesProvider()
+    {
+        return new ServiceCollection()
+            .AddScoped<IConfiguration>(_ => _configuration)
+            .AddSingleton<MysqlContext>()
+            .AddSingleton<RecipesDatabase>()
+            // based on Fluent Migrator docs
+            // https://fluentmigrator.github.io/articles/guides/upgrades/guide-2.0-to-3.0.html?tabs=di
+            .AddLogging(lb => lb.AddFluentMigratorConsole())
+            .AddFluentMigratorCore()
+            .ConfigureRunner(c => c.AddMySql5()
+                .WithGlobalConnectionString(ConnectionString)
+                .ScanIn(typeof(Program).Assembly).For.Migrations())
+            .BuildServiceProvider();
+    }
+
+    private void CreateTestDatabase()
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var databaseService = scope.ServiceProvider.GetRequiredService<RecipesDatabase>();
+
+        databaseService.Create("culinary_blog_test");
+    }
+
+    private void RunMigrations()
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var migrationService = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        
+        migrationService.ListMigrations();
+        migrationService.MigrateUp();
     }
 }
