@@ -31,7 +31,6 @@ public class DatabaseSetupFixture : IAsyncLifetime
         _mysqlContext = new MysqlContext(_configuration);
         _connectionStringToDatabase = _configuration.GetConnectionString("database");
         _connectionStringToSchema = _configuration.GetConnectionString("schema");
-        ServicesProvider();
     }
 
     public async Task InitializeAsync()
@@ -44,7 +43,6 @@ public class DatabaseSetupFixture : IAsyncLifetime
     public async Task DisposeAsync()
     {
         await using var connection = new MySqlConnection(_connectionStringToSchema);
-
         await connection.OpenAsync();
         
         try
@@ -68,32 +66,11 @@ public class DatabaseSetupFixture : IAsyncLifetime
             .Build();
     }
     
-    private ServiceProvider ServicesProvider()
-    {
-        return new ServiceCollection()
-            .AddScoped<IConfiguration>(_ => _configuration)
-            .AddSingleton<MysqlContext>(sp => 
-                new MysqlContext(
-                    sp.GetRequiredService<IConfiguration>(), 
-                    "database"))
-            .AddSingleton<RecipesDatabase>()
-            // based on Fluent Migrator docs
-            // https://fluentmigrator.github.io/articles/guides/upgrades/guide-2.0-to-3.0.html?tabs=di
-            .AddLogging(lb => lb
-                .AddFluentMigratorConsole())
-            .AddFluentMigratorCore()
-            .ConfigureRunner(mrb => mrb
-                .AddMySql5()
-                .WithGlobalConnectionString(ConnectionStringToSchema)
-                .ScanIn(typeof(Program).Assembly).For.Migrations())
-            .BuildServiceProvider();
-    }
-
     private void CreateTestDatabase()
     {
         var serviceProvider = new ServiceCollection()
-            .AddScoped<IConfiguration>(_ => _configuration)
-            .AddSingleton<MysqlContext>(sp => 
+            .AddScoped(_ => _configuration)
+            .AddSingleton(sp => 
                 new MysqlContext(
                     sp.GetRequiredService<IConfiguration>(), 
                     "database"))

@@ -1,4 +1,5 @@
 using FluentAssertions;
+using RecipesDataProvider.Infrastructure.Test.Integration.Database.TestData;
 using RecipesDataProvider.Infrastructure.Test.Integration.Fixtures;
 using Xunit;
 
@@ -20,6 +21,11 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
     [Fact]
     public void GetRecipes_ReturnsRecipesList_WhenNoExceptionIsThrown()
     {
+        var sut = _fixture.Sut;
+        var recipes = RecipesDataCollection.Recipes;
+
+        var result = sut.GetRecipes();
+        
         true.Should().BeTrue();
     }
 }
