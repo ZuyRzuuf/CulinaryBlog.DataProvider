@@ -4,17 +4,21 @@ using Xunit;
 
 namespace RecipesDataProvider.Infrastructure.Test.Integration.Repositories;
 
-public class RecipeRepositoryTest : IClassFixture<DatabaseSetupFixture>
+// [Collection("TestDatabaseSetup")]
+// public class RecipeRepositoryTest
+// public class RecipeRepositoryTest : IClassFixture<DatabaseSetupFixture>
+public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
 {
-    private readonly DatabaseSetupFixture _fixture;
+    private readonly RecipeRepositoryFixture _fixture;
+    // private readonly List _fakeTestData;
     
-    public RecipeRepositoryTest(DatabaseSetupFixture fixture)
+    public RecipeRepositoryTest(RecipeRepositoryFixture fixture)
     {
         _fixture = fixture;
     }
 
     [Fact]
-    public void Test1()
+    public void GetRecipes_ReturnsRecipesList_WhenNoExceptionIsThrown()
     {
         true.Should().BeTrue();
     }

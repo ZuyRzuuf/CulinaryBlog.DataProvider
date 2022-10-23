@@ -18,7 +18,7 @@ SqlMapper.AddTypeHandler(new MySqlGuidTypeHandler());
 builder.Services.AddLogging(l => l.AddFluentMigratorConsole())
     .AddFluentMigratorCore()
     .ConfigureRunner(c => c.AddMySql5()
-        .WithGlobalConnectionString(builder.Configuration.GetConnectionString("local"))
+        .WithGlobalConnectionString(builder.Configuration.GetConnectionString("schema"))
         .ScanIn(Assembly.GetExecutingAssembly()).For.Migrations());
 
 builder.Services.AddControllers();

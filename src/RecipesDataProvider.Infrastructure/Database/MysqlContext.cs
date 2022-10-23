@@ -1,5 +1,4 @@
 using System.Data;
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using RecipesDataProvider.Infrastructure.Helpers;
@@ -11,9 +10,9 @@ public class MysqlContext : IDbContext
 {
     private readonly string? _connectionString;
 
-    public MysqlContext(IConfiguration configuration)
+    public MysqlContext(IConfiguration configuration, string connectionStringName = "schema")
     {
-        _connectionString = configuration.GetConnectionString("local");
+        _connectionString = configuration.GetConnectionString(connectionStringName);
             
         if (!ConnectionStringValidator.Validate(_connectionString))
         {
