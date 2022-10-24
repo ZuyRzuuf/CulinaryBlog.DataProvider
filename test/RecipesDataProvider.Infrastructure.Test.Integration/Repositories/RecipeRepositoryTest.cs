@@ -23,6 +23,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
         var sut = _fixture.Sut;
         const int expectedItemsNumber = RecipesDataCollection.ItemsNumber;
 
+        var expected = _fixture.RecipesCollection;
         var result = await sut.GetRecipes();
 
         result.Should()
@@ -32,6 +33,8 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
             .And
             .HaveCount(expectedItemsNumber)
             .And
-            .OnlyHaveUniqueItems();
+            .OnlyHaveUniqueItems()
+            .And
+            .BeEquivalentTo(expected);
     }
 }
