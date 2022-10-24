@@ -1,13 +1,11 @@
 using System.IO;
 using System.Threading.Tasks;
-using Dapper;
 using FluentMigrator.Runner;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
 using RecipesDataProvider.Infrastructure.Database;
 using RecipesDataProvider.API.Migrations;
-using RecipesDataProvider.Infrastructure.Test.Integration.Database.TestData;
 using Xunit;
 
 namespace RecipesDataProvider.Infrastructure.Test.Integration.Fixtures;
@@ -33,11 +31,10 @@ public class DatabaseSetupFixture : IAsyncLifetime
         _connectionStringToSchema = _configuration.GetConnectionString("schema");
     }
 
-    public async Task InitializeAsync()
+    public virtual async Task InitializeAsync()
     {
         CreateTestDatabase();
         RunMigrations();
-        await AddRecipesData();
     }
 
     public async Task DisposeAsync()
@@ -101,14 +98,5 @@ public class DatabaseSetupFixture : IAsyncLifetime
         
         migrationService.ListMigrations();
         migrationService.MigrateUp();
-    }
-
-    private async Task AddRecipesData()
-    {
-        const string query = "INSERT INTO recipe (uuid, title) VALUES (@Uuid, @Title)";
-        var recipes = RecipesDataCollection.Recipes;
-
-        await using var connection = new MySqlConnection(_connectionStringToSchema);
-        await connection.ExecuteAsync(query, recipes);
     }
 }
