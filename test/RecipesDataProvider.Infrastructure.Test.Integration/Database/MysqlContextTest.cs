@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using RecipesDataProvider.Infrastructure.Database;
+using RecipesDataProvider.Infrastructure.Exceptions;
 using Xunit;
 
 namespace RecipesDataProvider.Infrastructure.Test.Integration.Database;

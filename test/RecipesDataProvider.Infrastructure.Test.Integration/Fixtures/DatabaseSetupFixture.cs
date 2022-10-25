@@ -21,12 +21,14 @@ public class DatabaseSetupFixture : IAsyncLifetime
     
     public string ConnectionStringToDatabase => _connectionStringToDatabase;
     public string ConnectionStringToSchema => _connectionStringToSchema;
-    protected MysqlContext MysqlTestContext => _mysqlContext;
+    protected MysqlContext MysqlTestContext { get; }
+    public MysqlContext MysqlTestContextWithoutSchema { get; }
 
     public DatabaseSetupFixture()
     {
         _configuration = ConfigurationProvider();
-        _mysqlContext = new MysqlContext(_configuration);
+        MysqlTestContext = new MysqlContext(_configuration);
+        MysqlTestContextWithoutSchema = new MysqlContext(_configuration, "database");
         _connectionStringToDatabase = _configuration.GetConnectionString("database");
         _connectionStringToSchema = _configuration.GetConnectionString("schema");
     }
@@ -35,6 +37,8 @@ public class DatabaseSetupFixture : IAsyncLifetime
     {
         CreateTestDatabase();
         RunMigrations();
+
+        await Task.CompletedTask;
     }
 
     public async Task DisposeAsync()

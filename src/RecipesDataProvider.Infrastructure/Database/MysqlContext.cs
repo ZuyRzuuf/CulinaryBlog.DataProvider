@@ -1,6 +1,7 @@
 using System.Data;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using RecipesDataProvider.Infrastructure.Exceptions;
 using RecipesDataProvider.Infrastructure.Helpers;
 using RecipesDataProvider.Infrastructure.Interfaces;
 

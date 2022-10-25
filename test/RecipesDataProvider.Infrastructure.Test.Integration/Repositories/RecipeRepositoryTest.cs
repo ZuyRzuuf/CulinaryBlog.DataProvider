@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using RecipesDataProvider.Domain.Entities;
+using RecipesDataProvider.Infrastructure.Exceptions;
+using RecipesDataProvider.Infrastructure.Repositories;
 using RecipesDataProvider.Infrastructure.Test.Integration.Database.TestData;
 using RecipesDataProvider.Infrastructure.Test.Integration.Fixtures;
 using Xunit;
@@ -36,5 +38,13 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
             .OnlyHaveUniqueItems()
             .And
             .BeEquivalentTo(expected);
+    }
+
+    [Fact]
+    public async Task Throw()
+    {
+        var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema);
+
+        await sut.Invoking(r => r.GetRecipes()).Should().ThrowAsync<DatabaseConnectionProblemException>();
     }
 }
