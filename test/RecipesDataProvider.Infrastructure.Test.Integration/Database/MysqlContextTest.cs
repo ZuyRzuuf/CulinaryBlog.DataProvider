@@ -56,6 +56,7 @@ public class MysqlContextTest
     {
         const string connectionStringStub =
             "server=localhost;port=3306;userid=admin;password=admin;database=test_db";
+        
         var appSettingsStub = new Dictionary<string, string> {
             {"ConnectionStrings:wrong", connectionStringStub}
         };
@@ -73,8 +74,9 @@ public class MysqlContextTest
     {
         const string badConnectionStringStub =
             "server=localhost;userid=admin;password=admin;database=test_db";
+        
         var appSettingsStub = new Dictionary<string, string> {
-            {"ConnectionStrings:local", badConnectionStringStub}
+            {"ConnectionStrings:schema", badConnectionStringStub}
         };
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(appSettingsStub)
@@ -83,5 +85,25 @@ public class MysqlContextTest
         Action action = () => new MysqlContext(configuration);
         
         action.Should().Throw<BadConnectionStringException>();
+    }
+
+    [Fact]
+    public void MysqlContext_ThrowsBadConnectionStringException_WhenConnectionStringIsIncorrect_2222222()
+    {
+        // const string badConnectionStringStub =
+        //     "server=localhost;userid=admin;password=admin;database=test_db";
+        //
+        // var appSettingsStub = new Dictionary<string, string> {
+        //     {"ConnectionStrings:schema", badConnectionStringStub}
+        // };
+        // var configuration = new ConfigurationBuilder()
+        //     .AddInMemoryCollection(appSettingsStub)
+        //     .Build();
+
+        var exceptionMessage = "Custom message";
+
+        Action action = () => throw new BadConnectionStringException(exceptionMessage);
+        
+        action.Should().Throw<BadConnectionStringException>().WithMessage(exceptionMessage);
     }
 }
