@@ -40,7 +40,7 @@ public class MysqlContextTest
         const string connectionStringStub =
             "server=localhost;port=3306;userid=admin;password=admin;database=test_db";
         var appSettingsStub = new Dictionary<string, string> {
-            {"ConnectionStrings:local", connectionStringStub}
+            {"ConnectionStrings:schema", connectionStringStub}
         };
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(appSettingsStub)
