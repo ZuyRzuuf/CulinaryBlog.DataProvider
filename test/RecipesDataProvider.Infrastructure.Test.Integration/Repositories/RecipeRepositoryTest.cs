@@ -37,11 +37,13 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
             .And
             .OnlyHaveUniqueItems()
             .And
+            .NotContainNulls(r => r.Title)
+            .And
             .BeEquivalentTo(expected);
     }
 
     [Fact]
-    public async Task Throw()
+    public async Task GetRecipes_ThrowsDatabaseConnectionProblemException_WhenDatabaseReturnsException()
     {
         var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema);
 

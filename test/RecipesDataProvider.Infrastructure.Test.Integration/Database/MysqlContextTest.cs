@@ -90,16 +90,6 @@ public class MysqlContextTest
     [Fact]
     public void MysqlContext_ThrowsBadConnectionStringException_WhenConnectionStringIsIncorrect_2222222()
     {
-        // const string badConnectionStringStub =
-        //     "server=localhost;userid=admin;password=admin;database=test_db";
-        //
-        // var appSettingsStub = new Dictionary<string, string> {
-        //     {"ConnectionStrings:schema", badConnectionStringStub}
-        // };
-        // var configuration = new ConfigurationBuilder()
-        //     .AddInMemoryCollection(appSettingsStub)
-        //     .Build();
-
         var exceptionMessage = "Custom message";
 
         Action action = () => throw new BadConnectionStringException(exceptionMessage);
