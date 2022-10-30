@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using RecipesDataProvider.Infrastructure.Database;
+using RecipesDataProvider.Infrastructure.Exceptions;
 using Xunit;
 
 namespace RecipesDataProvider.Infrastructure.Test.Integration.Database;
@@ -39,7 +40,7 @@ public class MysqlContextTest
         const string connectionStringStub =
             "server=localhost;port=3306;userid=admin;password=admin;database=test_db";
         var appSettingsStub = new Dictionary<string, string> {
-            {"ConnectionStrings:local", connectionStringStub}
+            {"ConnectionStrings:schema", connectionStringStub}
         };
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(appSettingsStub)
@@ -55,6 +56,7 @@ public class MysqlContextTest
     {
         const string connectionStringStub =
             "server=localhost;port=3306;userid=admin;password=admin;database=test_db";
+        
         var appSettingsStub = new Dictionary<string, string> {
             {"ConnectionStrings:wrong", connectionStringStub}
         };
@@ -72,8 +74,9 @@ public class MysqlContextTest
     {
         const string badConnectionStringStub =
             "server=localhost;userid=admin;password=admin;database=test_db";
+        
         var appSettingsStub = new Dictionary<string, string> {
-            {"ConnectionStrings:local", badConnectionStringStub}
+            {"ConnectionStrings:schema", badConnectionStringStub}
         };
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(appSettingsStub)
@@ -82,5 +85,15 @@ public class MysqlContextTest
         Action action = () => new MysqlContext(configuration);
         
         action.Should().Throw<BadConnectionStringException>();
+    }
+
+    [Fact]
+    public void MysqlContext_ThrowsBadConnectionStringException_WhenConnectionStringIsIncorrect_2222222()
+    {
+        var exceptionMessage = "Custom message";
+
+        Action action = () => throw new BadConnectionStringException(exceptionMessage);
+        
+        action.Should().Throw<BadConnectionStringException>().WithMessage(exceptionMessage);
     }
 }

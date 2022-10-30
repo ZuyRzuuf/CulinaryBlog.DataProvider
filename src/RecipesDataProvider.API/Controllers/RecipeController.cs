@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using RecipesDataProvider.Domain.Entities;
 using RecipesDataProvider.Domain.Interfaces;
 
-namespace RecipesDataProvider.Controllers;
+namespace RecipesDataProvider.API.Controllers;
 
 [Route("v1/[controller]")]
 public class RecipeController : ControllerBase

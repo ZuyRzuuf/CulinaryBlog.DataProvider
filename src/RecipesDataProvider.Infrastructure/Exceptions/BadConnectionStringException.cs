@@ -1,6 +1,4 @@
-using System.Runtime.Serialization;
-
-namespace RecipesDataProvider.Infrastructure;
+namespace RecipesDataProvider.Infrastructure.Exceptions;
 
 [Serializable]
 public class BadConnectionStringException : Exception

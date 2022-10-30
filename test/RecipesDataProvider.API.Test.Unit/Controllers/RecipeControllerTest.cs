@@ -5,7 +5,7 @@ using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using RecipesDataProvider.Controllers;
+using RecipesDataProvider.API.Controllers;
 using RecipesDataProvider.Domain.Entities;
 using RecipesDataProvider.Domain.Interfaces;
 using Xunit;

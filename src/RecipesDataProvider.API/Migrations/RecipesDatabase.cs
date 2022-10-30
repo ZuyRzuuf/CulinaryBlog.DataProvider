@@ -1,13 +1,14 @@
 using Dapper;
 using RecipesDataProvider.Infrastructure.Database;
+using RecipesDataProvider.Infrastructure.Interfaces;
 
-namespace RecipesDataProvider.Migrations;
+namespace RecipesDataProvider.API.Migrations;
 
-public class Database
+public class RecipesDatabase : IRecipesDatabase
 {
     private readonly MysqlContext _mysqlContext;
 
-    public Database(MysqlContext mysqlContext)
+    public RecipesDatabase(MysqlContext mysqlContext)
     {
         _mysqlContext = mysqlContext;
     }
