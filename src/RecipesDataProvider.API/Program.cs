@@ -6,12 +6,13 @@ using RecipesDataProvider.API.Migrations;
 using RecipesDataProvider.Infrastructure;
 using RecipesDataProvider.Infrastructure.Database;
 using RecipesDataProvider.Infrastructure.Helpers;
+using RecipesDataProvider.Infrastructure.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSingleton<MysqlContext>();
-builder.Services.AddSingleton<RecipesDatabase>();
+builder.Services.AddSingleton<IRecipesDatabase, RecipesDatabase>();
 builder.Services.AddInfrastructureServices();
 SqlMapper.AddTypeHandler(new MySqlGuidTypeHandler());
 // register Fluent Migrator
