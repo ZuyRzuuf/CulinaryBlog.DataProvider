@@ -7,8 +7,17 @@ using RecipesDataProvider.Infrastructure;
 using RecipesDataProvider.Infrastructure.Database;
 using RecipesDataProvider.Infrastructure.Helpers;
 using RecipesDataProvider.Infrastructure.Interfaces;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Log.Logger = new LoggerConfiguration()
+    .CreateBootstrapLogger();
+
+builder.Host
+    .UseSerilog((
+        (hostBuilderContext, loggerConfiguration) => loggerConfiguration
+            .ReadFrom.Configuration(hostBuilderContext.Configuration)));
 
 // Add services to the container.
 builder.Services.AddSingleton<MysqlContext>();
@@ -28,6 +37,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

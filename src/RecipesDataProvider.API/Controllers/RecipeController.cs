@@ -8,10 +8,12 @@ namespace RecipesDataProvider.API.Controllers;
 public class RecipeController : ControllerBase
 {
     private readonly IRecipeRepository _recipeRepository;
-
-    public RecipeController(IRecipeRepository recipeRepository)
+    private readonly ILogger<RecipeController> _logger;
+    
+    public RecipeController(IRecipeRepository recipeRepository, ILogger<RecipeController> logger)
     {
         _recipeRepository = recipeRepository;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -22,11 +24,13 @@ public class RecipeController : ControllerBase
         try
         {
             var recipes = await _recipeRepository.GetRecipes(); 
+            _logger.LogInformation("GetRecipes returns {@Recipes}", recipes);
         
             return Ok(recipes);
         }
         catch (Exception e)
         {
+            _logger.LogError(e, "Communication with repository failed");
             return StatusCode(500, e.Message);
         }
     }
