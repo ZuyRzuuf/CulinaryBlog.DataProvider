@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using RecipesDataProvider.API.Controllers;
 using RecipesDataProvider.Domain.Entities;
@@ -21,12 +22,13 @@ public class RecipeControllerTest
     public RecipeControllerTest()
     {
         _recipeRepositoryMock = new Mock<IRecipeRepository>();
-        _recipeController = new RecipeController(_recipeRepositoryMock.Object);
+        var loggerMock = new Mock<ILogger<RecipeController>>();
+        _recipeController = new RecipeController(_recipeRepositoryMock.Object, loggerMock.Object);
         _recipeInMemoryDatabase = new List<Recipe>
         {
             new() {Uuid = Guid.Parse("ab24fde6-495b-45b6-be3c-1343939b646a"), Title = "Recipe 1"},
             new() {Uuid = Guid.Parse("fe0efe1e-eab7-4ca4-a059-e51de04b0eed"), Title = "Recipe 2"},
-            new() {Uuid = Guid.Parse("a4f5ceb4-3d74-444f-a05f-57e8cfd42061"), Title = "Recipe 3"},
+            new() {Uuid = Guid.Parse("a4f5ceb4-3d74-444f-a05f-57e8cfd42061"), Title = "Recipe 3"}
         };
     }
     

@@ -22,7 +22,7 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     [Fact]
     public async Task GetRecipes_ReturnsStatusCode200_WhenServerRespondedWithOkObjectResult()
     {
-        var recipeController = new RecipeController(_fixture.RecipeRepository);
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.Logger);
         var result = await recipeController.GetRecipes();
         var data = (OkObjectResult)result;
         var statusCode = data.StatusCode;
@@ -35,7 +35,7 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     [Fact]
     public async Task GetRecipes_ReturnsListOfRecipes_WhenServerRespondedWithOkObjectResult()
     {
-        var recipeController = new RecipeController(_fixture.RecipeRepository);
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.Logger);
         var result = (OkObjectResult)await recipeController.GetRecipes();
 
         result.Value.Should().BeOfType<List<Recipe>>();
@@ -44,12 +44,11 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     [Fact]
     public async Task GetRecipes_ReturnsStatusCode500ButNotThrowsException_WhenServerThrowsException()
     {
-        var recipeController = new RecipeController(_fixture.RecipeRepositoryThrowingException);
+        var recipeController = new RecipeController(_fixture.RecipeRepositoryThrowingException, _fixture.Logger);
         var result = await recipeController.GetRecipes();
         var data = (ObjectResult)result;
-        var statusCode = data.StatusCode;
 
-        Action act = () => statusCode.Should().Be(500);
+        Action act = () => data.StatusCode.Should().Be(500);
         act.Should().NotThrow();
         result.Should().BeOfType<ObjectResult>();
     }
