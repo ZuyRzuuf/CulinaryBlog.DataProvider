@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using Moq;
+using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
 using RecipesDataProvider.Domain.Interfaces;
 using Xunit;
@@ -38,6 +39,48 @@ public class RecipeRepositoryTest
         {
             actual.Result.Should().BeOfType<List<Recipe>>();
             actual.Result.Count.Should().Be(_recipeInMemoryDatabase.Count);
+        }
+    }
+
+    [Fact]
+    public async Task CreateRecipe_ReturnsRecipe_WhenRecipeIsCreated()
+    {
+        var recipeDto = new CreateRecipeDto
+        {
+            Title = "Newly created Recipe"
+        };
+        var uuid = Guid.NewGuid();
+        var numberRecipesInDatabase = _recipeInMemoryDatabase.Count;
+        
+        _recipeRepositoryMock.Setup(r => r.CreateRecipe(recipeDto))
+            .Returns((RecipeDto dto) =>
+            {
+                var recipe = new Recipe
+                {
+                    Uuid = uuid,
+                    Title = dto.Title
+                };
+                
+                _recipeInMemoryDatabase.Add(recipe);
+
+                return Task.FromResult(recipe);
+            });
+
+        var createdRecipe = await _recipeRepositoryMock.Object.CreateRecipe(recipeDto);
+
+
+        using (new AssertionScope())
+        {
+            createdRecipe.Should()
+                .NotBeNull()
+                .And
+                .BeOfType<Recipe>();
+            createdRecipe.Uuid.Should().Be(uuid);
+            createdRecipe.Title.Should().Be(recipeDto.Title);
+            _recipeInMemoryDatabase.Should()
+                .HaveCount(numberRecipesInDatabase + 1)
+                .And
+                .Contain(createdRecipe);
         }
     }
 }
