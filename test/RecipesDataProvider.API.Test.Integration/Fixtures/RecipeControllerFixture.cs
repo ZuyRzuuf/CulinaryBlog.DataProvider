@@ -17,20 +17,23 @@ public class RecipeControllerFixture : DatabaseSetupFixture, IDisposable
 {
     public RecipeRepository RecipeRepository { get; }
     public RecipeRepository RecipeRepositoryThrowingException { get; }                                                                                                                                                                          
-    public ILogger<RecipeController> Logger { get; }
+    public ILogger<RecipeController> RecipeControllerLogger { get; }
+    public ILogger<RecipeRepository> RecipeRepositoryLogger { get; }
     public List<Recipe> RecipesCollection { get; }
     
     public RecipeControllerFixture() 
     {
-        RecipesCollection = RecipesDataCollection.Recipes;
-        RecipeRepositoryThrowingException = new RecipeRepository(MysqlTestContextWithoutSchema);
-        RecipeRepository = new RecipeRepository(MysqlTestContext);
-        
         var serilogLogger = new LoggerConfiguration()
             .CreateBootstrapLogger();
 
-        Logger = new SerilogLoggerFactory(serilogLogger)
+        RecipeControllerLogger = new SerilogLoggerFactory(serilogLogger)
             .CreateLogger<RecipeController>();
+        RecipeRepositoryLogger = new SerilogLoggerFactory(serilogLogger)
+            .CreateLogger<RecipeRepository>();
+
+        RecipesCollection = RecipesDataCollection.Recipes;
+        RecipeRepositoryThrowingException = new RecipeRepository(MysqlTestContextWithoutSchema, RecipeRepositoryLogger);
+        RecipeRepository = new RecipeRepository(MysqlTestContext, RecipeRepositoryLogger);
     }
 
     public override async Task InitializeAsync()

@@ -45,7 +45,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
     [Fact]
     public async Task GetRecipes_ThrowsDatabaseConnectionProblemException_WhenDatabaseReturnsException()
     {
-        var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema);
+        var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
 
         await sut.Invoking(r => r.GetRecipes()).Should().ThrowAsync<DatabaseConnectionProblemException>();
     }
