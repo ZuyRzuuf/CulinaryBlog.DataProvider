@@ -21,7 +21,6 @@ public class RecipeRepository : IRecipeRepository
 
     public async Task<IList<Recipe>> GetRecipes()
     {
-        _logger.LogInformation("Starting DataRecipesProvider Repository: GetRecipes()...");
         try
         {
             const string query = "SELECT * FROM recipe";
@@ -30,8 +29,37 @@ public class RecipeRepository : IRecipeRepository
             var recipes = await connection.QueryAsync<Recipe>(query);
 
             var temporaryRecipesList = recipes.ToList();
-            _logger.LogInformation("GetRecipes() returns {@Recipes}", temporaryRecipesList);
             return temporaryRecipesList;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Problem with database connection occurs");
+            throw new DatabaseConnectionProblemException(e.Message, e.InnerException);
+        }
+    }
+
+    public async Task<Recipe> CreateRecipe(CreateRecipeDto createRecipeDto)
+    {
+        try
+        {
+            const string query = "INSERT INTO recipe (uuid, title) VALUES (@Uuid, @Title)";
+        
+            var uuid = Guid.NewGuid();
+            var title = createRecipeDto.Title;
+            var parameters = new DynamicParameters();
+        
+            parameters.Add("Uuid", uuid);
+            parameters.Add("Title", title);
+
+            using var connection = _mysqlContext.CreateConnection();
+        
+            await connection.ExecuteAsync(query, parameters);
+
+            return new Recipe
+            {
+                Uuid = uuid,
+                Title = title
+            };
         }
         catch (Exception e)
         {
