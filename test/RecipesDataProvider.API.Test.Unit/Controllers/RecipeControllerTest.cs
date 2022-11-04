@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using RecipesDataProvider.API.Controllers;
+using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
 using RecipesDataProvider.Domain.Interfaces;
 using Xunit;
@@ -59,6 +60,73 @@ public class RecipeControllerTest
         {
             result.Value.Should().BeOfType<List<Recipe>>();
             recipesCount.Should().Be(3);
+        }
+    }
+
+    [Fact]
+    public async Task CreateRecipe_Returns_CreatedAtActionResult()
+    {
+        var recipeDto = new CreateRecipeDto
+        {
+            Title = "Newly created Recipe"
+        };
+        var uuid = Guid.NewGuid();
+        
+        _recipeRepositoryMock.Setup(r => r.CreateRecipe(recipeDto))
+            .Returns((RecipeDto dto) =>
+            {
+                var recipe = new Recipe
+                {
+                    Uuid = uuid,
+                    Title = dto.Title
+                };
+                
+                _recipeInMemoryDatabase.Add(recipe);
+
+                return Task.FromResult(recipe);
+            });
+
+        var response = await _recipeController.CreateRecipe(recipeDto);
+
+        using (new AssertionScope())
+        {
+            response.Should().BeOfType<CreatedAtActionResult>();
+            response.Should().BeAssignableTo<CreatedAtActionResult>();
+        }
+    }
+
+    [Fact]
+    public async Task CreateRecipe_ReturnsCreatedRecipe_WhenRecipeIsAddedToDatabase()
+    {
+        var recipeDto = new CreateRecipeDto
+        {
+            Title = "Newly created Recipe"
+        };
+        var uuid = Guid.NewGuid();
+        
+        _recipeRepositoryMock.Setup(r => r.CreateRecipe(recipeDto))
+            .Returns((RecipeDto dto) =>
+            {
+                var recipe = new Recipe
+                {
+                    Uuid = uuid,
+                    Title = dto.Title
+                };
+                
+                _recipeInMemoryDatabase.Add(recipe);
+
+                return Task.FromResult(recipe);
+            });
+
+        var response = await _recipeController.CreateRecipe(recipeDto);
+        var result = Assert.IsType<CreatedAtActionResult>(response);
+        var recipe = (Recipe) result.Value!;
+
+        using (new AssertionScope())
+        {
+            result.Value.Should().BeOfType<Recipe>();
+            recipe.Uuid.Should().Be(uuid);
+            recipe.Title.Should().Be(recipeDto.Title);
         }
     }
 }

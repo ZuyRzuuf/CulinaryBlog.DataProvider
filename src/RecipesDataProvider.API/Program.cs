@@ -1,11 +1,9 @@
 using System.Reflection;
-using Dapper;
 using FluentMigrator.Runner;
 using RecipesDataProvider.API.Extensions;
 using RecipesDataProvider.API.Migrations;
 using RecipesDataProvider.Infrastructure;
 using RecipesDataProvider.Infrastructure.Database;
-using RecipesDataProvider.Infrastructure.Helpers;
 using RecipesDataProvider.Infrastructure.Interfaces;
 using Serilog;
 
@@ -23,7 +21,7 @@ builder.Host
 builder.Services.AddSingleton<MysqlContext>();
 builder.Services.AddSingleton<IRecipesDatabase, RecipesDatabase>();
 builder.Services.AddInfrastructureServices();
-SqlMapper.AddTypeHandler(new MySqlGuidTypeHandler());
+
 // register Fluent Migrator
 builder.Services.AddLogging(l => l.AddFluentMigratorConsole())
     .AddFluentMigratorCore()

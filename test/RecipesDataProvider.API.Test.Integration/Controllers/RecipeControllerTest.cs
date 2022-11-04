@@ -5,6 +5,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using RecipesDataProvider.API.Controllers;
 using RecipesDataProvider.API.Test.Integration.Fixtures;
+using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
 using Xunit;
 
@@ -51,5 +52,41 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
         Action act = () => data.StatusCode.Should().Be(500);
         act.Should().NotThrow();
         result.Should().BeOfType<ObjectResult>();
+    }
+
+    [Fact]
+    public async Task CreateRecipe_ReturnsStatusCode201_WhenServerRespondedWithCreatedAtActionResult()
+    {
+        var recipeDto = new CreateRecipeDto
+        {
+            Title = "Newly created Recipe"
+        };
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+        var result = await recipeController.CreateRecipe(recipeDto);
+        var data = (CreatedAtActionResult)result;
+        var statusCode = data.StatusCode;
+
+        Action act = () => statusCode.Should().Be(201);
+        act.Should().NotThrow();
+        result.Should().BeOfType<CreatedAtActionResult>();
+    }
+
+    [Fact]
+    public async Task CreateRecipe_ReturnsCreatedRecipe_WhenServerRespondedWithCreatedAtActionResult()
+    {
+        var recipeDto = new CreateRecipeDto
+        {
+            Title = "Newly created Recipe"
+        };
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+        var result = (CreatedAtActionResult)await recipeController.CreateRecipe(recipeDto);
+        var createdRecipe = (Recipe)result.Value!;
+
+        result.Value.Should().BeOfType<Recipe>();
+        result.RouteValues.Should()
+            .ContainKeys("Uuid", "Title")
+            .And
+            .Contain("Title", recipeDto.Title);
+        createdRecipe.Title.Should().Be(recipeDto.Title);
     }
 }

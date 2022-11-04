@@ -28,8 +28,7 @@ public class RecipeRepository : IRecipeRepository
             using var connection = _mysqlContext.CreateConnection();
             var recipes = await connection.QueryAsync<Recipe>(query);
 
-            var temporaryRecipesList = recipes.ToList();
-            return temporaryRecipesList;
+            return recipes.ToList();
         }
         catch (Exception e)
         {
