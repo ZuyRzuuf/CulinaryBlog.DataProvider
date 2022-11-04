@@ -7,7 +7,7 @@ public class DatabaseConnectionProblemException : Exception
     {
     }
 
-    public DatabaseConnectionProblemException(string message = "Cannot connect database")
+    public DatabaseConnectionProblemException(string message = "Cannot connect to database")
         : base(message)
     {
     }

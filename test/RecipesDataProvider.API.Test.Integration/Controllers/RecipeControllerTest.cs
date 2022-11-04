@@ -59,7 +59,7 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     {
         var recipeDto = new CreateRecipeDto
         {
-            Title = "Newly created Recipe"
+            Title = "CreateRecipe_ReturnsStatusCode201_WhenServerRespondedWithCreatedAtActionResult"
         };
         var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
         var result = await recipeController.CreateRecipe(recipeDto);
@@ -76,7 +76,7 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     {
         var recipeDto = new CreateRecipeDto
         {
-            Title = "Newly created Recipe"
+            Title = "CreateRecipe_ReturnsCreatedRecipe_WhenServerRespondedWithCreatedAtActionResult"
         };
         var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
         var result = (CreatedAtActionResult)await recipeController.CreateRecipe(recipeDto);

@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
 using RecipesDataProvider.Domain.Interfaces;
@@ -30,6 +31,11 @@ public class RecipeRepository : IRecipeRepository
 
             return recipes.ToList();
         }
+        catch (MySqlException e)
+        {
+            _logger.LogError(e.InnerException, "Unknown database");
+            throw new UnknownDatabaseException(e.Message, e.InnerException);
+        }
         catch (Exception e)
         {
             _logger.LogError(e, "Problem with database connection occurs");
@@ -59,6 +65,17 @@ public class RecipeRepository : IRecipeRepository
                 Uuid = uuid,
                 Title = title
             };
+        }
+        catch (MySqlException e)
+        {
+            if (e.Message.Contains("Duplicate entry"))
+            {
+                _logger.LogError(e, "Recipe name has to be unique. Recipe {@Title} exists", createRecipeDto.Title);
+                throw new RecipeHasToBeUniqueException(e.Message, e.InnerException);
+            }
+            
+            _logger.LogError(e.InnerException, "Unknown database");
+            throw;
         }
         catch (Exception e)
         {
