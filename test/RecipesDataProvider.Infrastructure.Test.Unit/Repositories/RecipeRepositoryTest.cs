@@ -67,8 +67,7 @@ public class RecipeRepositoryTest
             });
 
         var createdRecipe = await _recipeRepositoryMock.Object.CreateRecipe(recipeDto);
-
-
+        
         using (new AssertionScope())
         {
             createdRecipe.Should()

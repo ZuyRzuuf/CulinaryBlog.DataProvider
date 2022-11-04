@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -49,7 +50,8 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
     {
         var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
 
-        await sut.Invoking(r => r.GetRecipes()).Should().ThrowAsync<DatabaseConnectionProblemException>();
+        await sut.Invoking(r => r
+            .GetRecipes()).Should().ThrowAsync<UnknownDatabaseException>();
     }
 
     [Fact]
@@ -59,7 +61,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
 
         var recipeDto = new CreateRecipeDto
         {
-            Title = "Newly created recipe"
+            Title = "CreateRecipe_ReturnsRecipe_WhenRecipeIsCreated"
         };
         var sut = _fixture.Sut;
         var createdRecipe = await sut.CreateRecipe(recipeDto);
@@ -79,5 +81,20 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
                 .And
                 .ContainEquivalentOf(createdRecipe);
         }
+    }
+
+    [Fact]
+    public async Task CreateRecipe_ThrowsRecipeHasToBeUniqueException_WhenRecipeTitleExists()
+    {
+        var sut = _fixture.Sut;
+        var existingDatabaseContent = await sut.GetRecipes();
+        var existingRecipe = existingDatabaseContent.FirstOrDefault();
+        var recipeDto = new CreateRecipeDto
+        {
+            Title = existingRecipe!.Title
+        };
+        
+        await sut.Invoking(r => r
+            .CreateRecipe(recipeDto)).Should().ThrowAsync<RecipeHasToBeUniqueException>();
     }
 }
