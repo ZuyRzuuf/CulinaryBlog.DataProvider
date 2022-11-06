@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Bogus;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using RecipesDataProvider.API.Controllers;
 using RecipesDataProvider.API.Test.Integration.Fixtures;
 using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
+using RecipesDataProvider.Infrastructure.Exceptions;
 using Xunit;
 
 namespace RecipesDataProvider.API.Test.Integration.Controllers;
@@ -88,5 +91,48 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
             .And
             .Contain("Title", recipeDto.Title);
         createdRecipe.Title.Should().Be(recipeDto.Title);
+    }
+
+    [Fact]
+    public async Task UpdateRecipe_ReturnsStatusCode204_WhenRecipeIsUpdated()
+    {
+        var recipesList = await _fixture.RecipeRepository.GetRecipes();
+        var recipeToUpdate = recipesList.First();
+        var recipeDto = new UpdateRecipeDto
+        {
+            Uuid = recipeToUpdate.Uuid,
+            Title = new Bogus.DataSets.Lorem().Sentences(2)
+        };
+        
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+        var result = await recipeController.UpdateRecipe(recipeDto);
+        var data = (NoContentResult)result;
+
+        result.Should()
+            .BeOfType<NoContentResult>()
+            .And
+            .BeAssignableTo<NoContentResult>();
+        data.StatusCode.Should().Be(204);
+    }
+    
+    [Fact]
+    public async Task UpdateRecipe_ReturnsStatusCode404_WhenRecipeDoesNotExists()
+    {
+        var recipeDto = new UpdateRecipeDto
+        {
+            Uuid = Guid.NewGuid(),
+            Title = new Bogus.DataSets.Lorem().Sentences(2)
+        };
+        
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+
+        var result = await recipeController.UpdateRecipe(recipeDto);
+        var data = (ObjectResult)result;
+        
+        result.Should()
+            .BeOfType<ObjectResult>()
+            .And
+            .BeAssignableTo<ObjectResult>();
+        data.StatusCode.Should().Be(404);
     }
 }

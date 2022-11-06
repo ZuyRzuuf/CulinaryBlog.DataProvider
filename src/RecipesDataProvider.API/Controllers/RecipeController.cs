@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
 using RecipesDataProvider.Domain.Interfaces;
+using RecipesDataProvider.Infrastructure.Exceptions;
 
 namespace RecipesDataProvider.API.Controllers;
 
@@ -50,6 +51,36 @@ public class RecipeController : ControllerBase
                 nameof(GetRecipes), 
                 new {uuid = recipe.Uuid, title = recipe.Title}, 
                 recipe);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Communication with repository failed");
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    [HttpPut]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UpdateRecipe(UpdateRecipeDto recipeDto)
+    {
+        try
+        {
+            var response = await _recipeRepository.UpdateRecipe(recipeDto);
+
+            if (response == 0)
+            {
+                throw new RecipeDoesNotExistException();
+            }
+            
+            _logger.LogInformation("Updated recipe {@Title}", recipeDto.Title);
+            return NoContent();
+        }
+        catch (RecipeDoesNotExistException e)
+        {
+            _logger.LogError(e.InnerException, "Recipe '{@RecipeUuid}' does not exist", recipeDto.Uuid);
+            return StatusCode(404, $"Recipe '{recipeDto.Uuid}' does not exist");
         }
         catch (Exception e)
         {
