@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -127,6 +128,81 @@ public class RecipeControllerTest
             result.Value.Should().BeOfType<Recipe>();
             recipe.Uuid.Should().Be(uuid);
             recipe.Title.Should().Be(recipeDto.Title);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateRecipe_ReturnsStatusCode204_WhenRecipeIsUpdated()
+    {
+        var recipeToUpdate = _recipeInMemoryDatabase.First();
+        var recipeDto = new UpdateRecipeDto
+        {
+            Uuid = recipeToUpdate.Uuid,
+            Title = "Updated Recipe Title"
+        };
+        
+        _recipeRepositoryMock.Setup(r => r.UpdateRecipe(recipeDto))
+            .Returns((UpdateRecipeDto dto) =>
+            {
+                var enumerable = _recipeInMemoryDatabase
+                    .Where(r => r.Uuid == dto.Uuid)
+                    .Select(r => 
+                    { 
+                        r.Title = dto.Title; 
+                        return r;
+                    });
+
+                var test = _recipeInMemoryDatabase
+                    .Any(r => r.Uuid == dto.Uuid);
+
+                return Task.FromResult(test ? 1 : 0);
+            });
+
+        var response = await _recipeController.UpdateRecipe(recipeDto);
+        var data = (NoContentResult)response;
+
+        using (new AssertionScope())
+        {
+            response.Should().BeOfType<NoContentResult>();
+            response.Should().BeAssignableTo<NoContentResult>();
+            data.StatusCode.Should().Be(204);
+        }
+    }
+
+    [Fact]
+    public async Task UpdateRecipe_ReturnsStatusCode404_WhenRecipeDoesNotExist()
+    {
+        var recipeDto = new UpdateRecipeDto
+        {
+            Uuid = Guid.NewGuid(),
+            Title = "Non existing Recipe"
+        };
+        
+        _recipeRepositoryMock.Setup(r => r.UpdateRecipe(recipeDto))
+            .Returns((UpdateRecipeDto dto) =>
+            {
+                var enumerable = _recipeInMemoryDatabase
+                    .Where(r => r.Uuid == dto.Uuid)
+                    .Select(r => 
+                    { 
+                        r.Title = dto.Title; 
+                        return r;
+                    });
+
+                var test = _recipeInMemoryDatabase
+                    .Any(r => r.Uuid == dto.Uuid);
+
+                return Task.FromResult(test ? 1 : 0);
+            });
+    
+        var response = await _recipeController.UpdateRecipe(recipeDto);
+        var data = (ObjectResult)response;
+
+        using (new AssertionScope())
+        {
+            response.Should().BeOfType<ObjectResult>();
+            response.Should().BeAssignableTo<ObjectResult>();
+            data.StatusCode.Should().Be(404);
         }
     }
 }
