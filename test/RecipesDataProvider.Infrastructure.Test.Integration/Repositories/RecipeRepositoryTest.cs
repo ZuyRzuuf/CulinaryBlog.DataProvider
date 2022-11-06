@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using MySql.Data.MySqlClient;
 using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
 using RecipesDataProvider.Infrastructure.Exceptions;
@@ -40,9 +42,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
             .And
             .OnlyHaveUniqueItems()
             .And
-            .NotContainNulls(r => r.Title)
-            .And
-            .BeEquivalentTo(expected);
+            .NotContainNulls(r => r.Title);
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
 
         var recipeDto = new CreateRecipeDto
         {
-            Title = "CreateRecipe_ReturnsRecipe_WhenRecipeIsCreated"
+            Title = new Bogus.DataSets.Lorem().Sentence(2)
         };
         var sut = _fixture.Sut;
         var createdRecipe = await sut.CreateRecipe(recipeDto);
@@ -96,5 +96,73 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
         
         await sut.Invoking(r => r
             .CreateRecipe(recipeDto)).Should().ThrowAsync<RecipeHasToBeUniqueException>();
+    }
+
+    [Fact]
+    public async Task UpdateRecipe_Returns1_WhenRecipeIsUpdated()
+    {
+        var sut = _fixture.Sut;
+        var baseRecipesList = await sut.GetRecipes();
+        var recipeToUpdate = baseRecipesList.First();
+        var recipeDto = new UpdateRecipeDto
+        {
+            Uuid = recipeToUpdate.Uuid,
+            Title = new Bogus.DataSets.Lorem().Sentence(2)
+        };
+
+        var response = await sut.UpdateRecipe(recipeDto);
+
+        response.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task UpdateRecipe_DatabaseContainsUpdatedRecipe_WhenRecipeIsUpdated()
+    {
+        var sut = _fixture.Sut;
+        var baseRecipesList = await sut.GetRecipes();
+        var recipeToUpdate = baseRecipesList.First();
+        var recipeDto = new UpdateRecipeDto
+        {
+            Uuid = recipeToUpdate.Uuid,
+            Title = new Bogus.DataSets.Lorem().Sentence(2)
+        };
+
+        await sut.UpdateRecipe(recipeDto);
+        var updatedRecipesList = await sut.GetRecipes();
+
+        updatedRecipesList.Should()
+            .HaveCount(baseRecipesList.Count)
+            .And
+            .NotContain(recipeToUpdate)
+            .And
+            .ContainEquivalentOf(recipeDto);
+    }
+    
+    [Fact]
+    public async Task UpdateRecipe_ThrowsMySqlException_WhenDatabaseReturnsException()
+    {
+        var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
+        var recipeDto = new UpdateRecipeDto
+        {
+            Uuid = Guid.NewGuid(),
+            Title = new Bogus.DataSets.Lorem().Sentence(2)
+        };
+
+        await sut.Invoking(r => r
+            .UpdateRecipe(recipeDto)).Should().ThrowAsync<MySqlException>();
+    }
+    
+    [Fact]
+    public async Task UpdateRecipe_ThrowsRecipeDoesNotExistException_WhenRecipeToUpdateDoesNotExist()
+    {
+        var sut = _fixture.Sut;
+        var recipeDto = new UpdateRecipeDto
+        {
+            Uuid = Guid.NewGuid(),
+            Title = new Bogus.DataSets.Lorem().Sentence(2)
+        };
+
+        await sut.Invoking(r => r
+            .UpdateRecipe(recipeDto)).Should().ThrowAsync<RecipeDoesNotExistException>();
     }
 }
