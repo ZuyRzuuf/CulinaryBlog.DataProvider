@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Microsoft.AspNetCore.Components.Web;
 using Moq;
 using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
@@ -81,5 +83,68 @@ public class RecipeRepositoryTest
                 .And
                 .Contain(createdRecipe);
         }
+    }
+
+    [Fact]
+    public async Task UpdateRecipe_Returns1_WhenRecipeIsUpdated()
+    {
+        var recipeToUpdate = _recipeInMemoryDatabase.First();
+        var recipeDto = new UpdateRecipeDto
+        {
+            Uuid = recipeToUpdate.Uuid,
+            Title = "Updated title"
+        };
+
+        _recipeRepositoryMock.Setup(r => r.UpdateRecipe(recipeDto))
+            .Returns((UpdateRecipeDto dto) =>
+            {
+                var enumerable = _recipeInMemoryDatabase
+                    .Where(r => r.Uuid == dto.Uuid)
+                    .Select(r => 
+                    { 
+                        r.Title = dto.Title; 
+                        return r;
+                    });
+
+                var test = _recipeInMemoryDatabase
+                    .Any(r => r.Uuid == dto.Uuid);
+
+                return Task.FromResult(test ? 1 : 0);
+            });
+
+        var result = await _recipeRepositoryMock.Object.UpdateRecipe(recipeDto);
+
+        result.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task UpdateRecipe_Returns0_WhenRecipeDoesNotExist()
+    {
+        var recipeDto = new UpdateRecipeDto
+        {
+            Uuid = Guid.NewGuid(),
+            Title = "Non existing recipe"
+        };
+
+        _recipeRepositoryMock.Setup(r => r.UpdateRecipe(recipeDto))
+            .Returns((UpdateRecipeDto dto) =>
+            {
+                var enumerable = _recipeInMemoryDatabase
+                    .Where(r => r.Uuid == dto.Uuid)
+                    .Select(r => 
+                    { 
+                        r.Title = dto.Title; 
+                        return r;
+                    });
+
+                var test = _recipeInMemoryDatabase
+                    .Any(r => r.Uuid == dto.Uuid);
+
+                return Task.FromResult(test ? 1 : 0);
+            });
+
+        var result = await _recipeRepositoryMock.Object.UpdateRecipe(recipeDto);
+
+        result.Should().Be(0);
     }
 }

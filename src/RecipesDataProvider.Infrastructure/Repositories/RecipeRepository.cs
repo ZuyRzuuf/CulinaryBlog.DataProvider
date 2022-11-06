@@ -83,4 +83,42 @@ public class RecipeRepository : IRecipeRepository
             throw new DatabaseConnectionProblemException(e.Message, e.InnerException);
         }
     }
+
+    public async Task<int> UpdateRecipe(UpdateRecipeDto updateRecipeDto)
+    {
+        try
+        {
+            const string query = "UPDATE recipe SET title = @Title WHERE uuid = @Uuid";
+
+            var uuid = updateRecipeDto.Uuid;
+            var title = updateRecipeDto.Title;
+            var parameters = new DynamicParameters();
+        
+            parameters.Add("Uuid", uuid);
+            parameters.Add("Title", title);
+
+            using var connection = _mysqlContext.CreateConnection();
+        
+            var result = await connection.ExecuteAsync(query, parameters);
+
+            if (result != 0) return result;
+            
+            throw new RecipeDoesNotExistException();
+        }
+        catch (RecipeDoesNotExistException e)
+        {
+            _logger.LogError(e.InnerException, "Recipe '{@Recipe}' doesn't exist", updateRecipeDto.Title);
+            throw;
+        }
+        catch (MySqlException e)
+        {
+            _logger.LogError(e.InnerException, "Unknown database");
+            throw;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Problem with database connection occurs");
+            throw new DatabaseConnectionProblemException(e.Message, e.InnerException);
+        }
+    }
 }
