@@ -147,4 +147,47 @@ public class RecipeRepositoryTest
 
         result.Should().Be(0);
     }
+
+    [Fact]
+    public async Task DeleteRecipe_Returns1_WhenRecipeIsDeleted()
+    {
+        var recipeToDelete = _recipeInMemoryDatabase.First();
+        var uuid = recipeToDelete.Uuid;
+
+        _recipeRepositoryMock.Setup(r => r.DeleteRecipe(uuid))
+            .Returns((Guid recipeUuid) =>
+            {
+                var recipes = _recipeInMemoryDatabase
+                    .Where(r => r.Uuid == recipeUuid).ToList();
+                
+                var test = recipes.RemoveAll(r => r.Uuid == recipeUuid);
+
+                return Task.FromResult(test == 1 ? 1 : 0);
+            });
+
+        var result = await _recipeRepositoryMock.Object.DeleteRecipe(uuid);
+
+        result.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task DeleteRecipe_Returns0_WhenRecipeDoesNotExist()
+    {
+        var uuid = Guid.NewGuid();
+    
+        _recipeRepositoryMock.Setup(r => r.DeleteRecipe(uuid))
+            .Returns((Guid recipeUuid) =>
+            {
+                var recipes = _recipeInMemoryDatabase
+                    .Where(r => r.Uuid == recipeUuid).ToList();
+
+                var test = recipes.RemoveAll(r => r.Uuid == uuid);
+    
+                return Task.FromResult(test == 1 ? 1 : 0);
+            });
+    
+        var result = await _recipeRepositoryMock.Object.DeleteRecipe(uuid);
+    
+        result.Should().Be(0);
+    }
 }

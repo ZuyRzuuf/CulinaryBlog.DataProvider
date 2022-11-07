@@ -8,4 +8,5 @@ public interface IRecipeRepository
     public Task<IList<Recipe>> GetRecipes();
     public Task<Recipe> CreateRecipe(CreateRecipeDto createRecipeDto);
     public Task<int> UpdateRecipe(UpdateRecipeDto updateRecipeDto);
+    public Task<int> DeleteRecipe(Guid uuid);
 }

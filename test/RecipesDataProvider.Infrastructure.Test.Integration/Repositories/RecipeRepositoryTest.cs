@@ -165,4 +165,55 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
         await sut.Invoking(r => r
             .UpdateRecipe(recipeDto)).Should().ThrowAsync<RecipeDoesNotExistException>();
     }
+    
+    [Fact]
+    public async Task DeleteRecipe_Returns1_WhenRecipeIsDeleted()
+    {
+        var sut = _fixture.Sut;
+        var baseRecipesList = await sut.GetRecipes();
+        var recipeToDelete = baseRecipesList.First();
+    
+        var response = await sut.DeleteRecipe(recipeToDelete.Uuid);
+    
+        response.Should().Be(1);
+    }
+    
+    [Fact]
+    public async Task DeleteRecipe_DatabaseDoesNotContainDeletedRecipe_WhenRecipeIsDeleted()
+    {
+        var sut = _fixture.Sut;
+        var baseRecipesList = await sut.GetRecipes();
+        var recipeToDelete = baseRecipesList.First();
+    
+        await sut.DeleteRecipe(recipeToDelete.Uuid);
+        var deletedRecipesList = await sut.GetRecipes();
+
+        deletedRecipesList.Should()
+            .HaveCount(baseRecipesList.Count - 1)
+            .And
+            .NotContain(recipeToDelete)
+            .And
+            .NotBeEquivalentTo(baseRecipesList);
+        deletedRecipesList.Select(r => r.Uuid).Should().NotEqual(baseRecipesList.Select(r => r.Uuid));
+    }
+    
+    [Fact]
+    public async Task DeleteRecipe_ThrowsMySqlException_WhenDatabaseReturnsException()
+    {
+        var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
+        var uuid = Guid.NewGuid();
+    
+        await sut.Invoking(r => r
+            .DeleteRecipe(uuid)).Should().ThrowAsync<MySqlException>();
+    }
+    
+    [Fact]
+    public async Task DeleteRecipe_ThrowsRecipeDoesNotExistException_WhenRecipeToDeleteDoesNotExist()
+    {
+        var sut = _fixture.Sut;
+        var uuid = Guid.NewGuid();
+    
+        await sut.Invoking(r => r
+            .DeleteRecipe(uuid)).Should().ThrowAsync<RecipeDoesNotExistException>();
+    }
 }
