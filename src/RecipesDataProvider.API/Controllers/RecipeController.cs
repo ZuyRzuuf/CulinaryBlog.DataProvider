@@ -88,4 +88,31 @@ public class RecipeController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
+
+    [HttpDelete]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteRecipe(Guid uuid)
+    {
+        try
+        {
+            var response = await _recipeRepository.DeleteRecipe(uuid);
+
+            if (response == 0)
+                throw new RecipeDoesNotExistException();
+            
+            return NoContent();
+        }
+        catch (RecipeDoesNotExistException e)
+        {
+            _logger.LogError(e.InnerException, "Recipe '{@Uuid}' does not exist", uuid);
+            return StatusCode(404, $"Recipe '{uuid}' does not exist");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Communication with repository failed");
+            return StatusCode(500, e.Message);
+        }
+    }
 }

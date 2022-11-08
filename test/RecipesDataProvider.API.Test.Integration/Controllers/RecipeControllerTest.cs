@@ -135,4 +135,38 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
             .BeAssignableTo<ObjectResult>();
         data.StatusCode.Should().Be(404);
     }
+    
+    [Fact]
+    public async Task DeleteRecipe_ReturnsStatusCode204_WhenRecipeIsDeleted()
+    {
+        var recipesList = await _fixture.RecipeRepository.GetRecipes();
+        var recipeToDelete = recipesList.First();
+        
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+        var result = await recipeController.DeleteRecipe(recipeToDelete.Uuid);
+        var data = (NoContentResult)result;
+    
+        result.Should()
+            .BeOfType<NoContentResult>()
+            .And
+            .BeAssignableTo<NoContentResult>();
+        data.StatusCode.Should().Be(204);
+    }
+    
+    [Fact]
+    public async Task DeleteRecipe_ReturnsStatusCode404_WhenRecipeDoesNotExists()
+    {
+        var recipeToDelete = Guid.NewGuid();
+        
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+    
+        var result = await recipeController.DeleteRecipe(recipeToDelete);
+        var data = (ObjectResult)result;
+        
+        result.Should()
+            .BeOfType<ObjectResult>()
+            .And
+            .BeAssignableTo<ObjectResult>();
+        data.StatusCode.Should().Be(404);
+    }
 }

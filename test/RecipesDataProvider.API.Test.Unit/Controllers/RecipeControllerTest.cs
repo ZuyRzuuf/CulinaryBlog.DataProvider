@@ -205,4 +205,61 @@ public class RecipeControllerTest
             data.StatusCode.Should().Be(404);
         }
     }
+    
+    [Fact]
+    public async Task DeleteRecipe_ReturnsStatusCode204_WhenRecipeIsDeleted()
+    {
+        var recipeToDelete = _recipeInMemoryDatabase.First();
+        
+        _recipeRepositoryMock.Setup(r => r.DeleteRecipe(recipeToDelete.Uuid))
+            .Returns((Guid recipeUuid) =>
+            {
+                var recipes = _recipeInMemoryDatabase
+                    .Where(r => r.Uuid == recipeUuid)
+                    .ToList();
+    
+                var test = recipes.RemoveAll(r => r.Uuid == recipeUuid);
+    
+                return Task.FromResult(test == 1 ? 1 : 0);
+            });
+    
+        var response = await _recipeController.DeleteRecipe(recipeToDelete.Uuid);
+        var data = (NoContentResult)response;
+    
+        using (new AssertionScope())
+        {
+            response.Should().BeOfType<NoContentResult>();
+            response.Should().BeAssignableTo<NoContentResult>();
+            data.StatusCode.Should().Be(204);
+        }
+    }
+    
+    [Fact]
+    public async Task DeleteRecipe_ReturnsStatusCode404_WhenRecipeDoesNotExist()
+    {
+        var recipeToDelete = Guid.NewGuid();
+        
+        _recipeRepositoryMock.Setup(r => r.DeleteRecipe(recipeToDelete))
+            .Returns((Guid recipeUuid) =>
+            {
+                var recipes = _recipeInMemoryDatabase
+                    .Where(r => r.Uuid == recipeUuid)
+                    .ToList();
+    
+                var test = recipes
+                    .RemoveAll(r => r.Uuid == recipeUuid);
+    
+                return Task.FromResult(test == 1 ? 1 : 0);
+            });
+    
+        var response = await _recipeController.DeleteRecipe(recipeToDelete);
+        var data = (ObjectResult)response;
+    
+        using (new AssertionScope())
+        {
+            response.Should().BeOfType<ObjectResult>();
+            response.Should().BeAssignableTo<ObjectResult>();
+            data.StatusCode.Should().Be(404);
+        }
+    }
 }
