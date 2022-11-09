@@ -28,17 +28,13 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
     public async Task GetRecipes_ReturnsRecipesList_WhenNoExceptionIsThrown()
     {
         var sut = _fixture.Sut;
-        const int expectedItemsNumber = RecipesDataCollection.ItemsNumber;
 
-        var expected = _fixture.RecipesCollection;
         var result = await sut.GetRecipes();
 
         result.Should()
             .NotBeEmpty()
             .And
             .BeOfType<List<Recipe>>()
-            .And
-            .HaveCount(expectedItemsNumber)
             .And
             .OnlyHaveUniqueItems()
             .And
@@ -53,17 +49,53 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
         await sut.Invoking(r => r
             .GetRecipes()).Should().ThrowAsync<UnknownDatabaseException>();
     }
+    
+    [Fact]
+    public async Task GetRecipeByUuid_ReturnsRecipe_WhenRecipeExists()
+    {
+        var sut = _fixture.Sut;
+        var recipes = await sut.GetRecipes();
+        var recipeToGet = recipes.First();
+
+        var result = await sut.GetRecipeByUuid(recipeToGet.Uuid);
+    
+        result.Should()
+            .NotBeNull()
+            .And
+            .BeOfType<Recipe>()
+            .And
+            .BeEquivalentTo(recipeToGet);
+    }
+    
+    [Fact]
+    public async Task GetRecipeByUuid_ThrowsRecipeDoesNotExistException_WhenRecipeDoesNotExist()
+    {
+        var sut = _fixture.Sut;
+
+        await sut.Invoking(r => r
+            .GetRecipeByUuid(Guid.NewGuid())).Should().ThrowAsync<RecipeDoesNotExistException>();
+    }
+    
+    [Fact]
+    public async Task GetRecipeByUuid_ThrowsDatabaseConnectionProblemException_WhenDatabaseReturnsException()
+    {
+        var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
+    
+        await sut.Invoking(r => r
+            .GetRecipeByUuid(Guid.NewGuid())).Should().ThrowAsync<UnknownDatabaseException>();
+    }
 
     [Fact]
     public async Task CreateRecipe_ReturnsRecipe_WhenRecipeIsCreated()
     {
-        const int numberRecipesInDatabase = RecipesDataCollection.ItemsNumber;
+        var sut = _fixture.Sut;
+        var recipes = await sut.GetRecipes();
+        var numberRecipesInDatabase = recipes.Count;
 
         var recipeDto = new CreateRecipeDto
         {
             Title = new Bogus.DataSets.Lorem().Sentence(2)
         };
-        var sut = _fixture.Sut;
         var createdRecipe = await sut.CreateRecipe(recipeDto);
         var databaseContent = await sut.GetRecipes();
 
