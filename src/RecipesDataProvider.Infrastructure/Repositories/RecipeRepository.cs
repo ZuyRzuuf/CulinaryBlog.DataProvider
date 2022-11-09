@@ -44,6 +44,43 @@ public class RecipeRepository : IRecipeRepository
         }
     }
 
+    public async Task<Recipe> GetRecipeByUuid(Guid uuid)
+    {
+        try
+        {
+            const string query = "SELECT * FROM recipe WHERE uuid = @Uuid";
+
+            var parameters = new DynamicParameters();
+            
+            parameters.Add("Uuid", uuid, DbType.Guid);
+
+            using var connection = _mysqlContext.CreateConnection();
+
+            var result = await connection.QueryAsync<Recipe>(query, parameters);
+            var recipe = result.SingleOrDefault();
+
+            if (recipe == null)
+                throw new RecipeDoesNotExistException();
+
+            return recipe;
+        }
+        catch (RecipeDoesNotExistException e)
+        {
+            _logger.LogError(e.InnerException, "Recipe '{@Uuid}' doesn't exist", uuid);
+            throw;
+        }
+        catch (MySqlException e)
+        {
+            _logger.LogError(e.InnerException, "Unknown database");
+            throw new UnknownDatabaseException(e.Message, e.InnerException);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Problem with database connection occurs");
+            throw new DatabaseConnectionProblemException(e.Message, e.InnerException);
+        }
+    }
+
     public async Task<Recipe> CreateRecipe(CreateRecipeDto createRecipeDto)
     {
         try

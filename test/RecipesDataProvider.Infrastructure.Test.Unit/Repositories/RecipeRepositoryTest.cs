@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
-using Microsoft.AspNetCore.Components.Web;
 using Moq;
 using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
@@ -42,6 +41,49 @@ public class RecipeRepositoryTest
             actual.Result.Should().BeOfType<List<Recipe>>();
             actual.Result.Count.Should().Be(_recipeInMemoryDatabase.Count);
         }
+    }
+
+    [Fact]
+    public async Task GetRecipesByUuid_ReturnsRecipe_WhenUuidExists()
+    {
+        var recipeToGet = _recipeInMemoryDatabase.First();
+        _recipeRepositoryMock.Setup(r => r.GetRecipeByUuid(recipeToGet.Uuid))
+            .Returns((Guid uuid) =>
+            {
+                var recipe = _recipeInMemoryDatabase
+                    .SingleOrDefault(r => r.Uuid == uuid);
+
+                return Task.FromResult(recipe)!;
+            });
+                
+
+        var actual = await _recipeRepositoryMock.Object.GetRecipeByUuid(recipeToGet.Uuid);
+
+        using (new AssertionScope())
+        {
+            actual.Should().BeOfType<Recipe>();
+            actual.Title.Should().Be(recipeToGet.Title);
+            actual.Uuid.Should().Be(recipeToGet.Uuid);
+        }
+    }
+
+    [Fact]
+    public async Task GetRecipesByUuid_ThrowsRecipeDoesNotExistException_WhenUuidDoesNotExists()
+    {
+        var recipeToGet = Guid.NewGuid();
+        
+        _recipeRepositoryMock.Setup(r => r.GetRecipeByUuid(recipeToGet))
+            .Returns((Guid uuid) =>
+            {
+                var recipe = _recipeInMemoryDatabase
+                    .SingleOrDefault(r => r.Uuid == uuid);
+
+                return Task.FromResult(recipe)!;
+            });
+
+        var actual = await _recipeRepositoryMock.Object.GetRecipeByUuid(recipeToGet);
+
+        actual.Should().BeNull();
     }
 
     [Fact]
