@@ -37,6 +37,36 @@ public class RecipeController : ControllerBase
         }
     }
 
+    [HttpGet("{uuid:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Recipe))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetRecipeByUuid(Guid uuid)
+    {
+        try
+        {
+            var recipe = await _recipeRepository.GetRecipeByUuid(uuid); 
+            _logger.LogInformation("GetRecipeByUuid returns {@Recipe}", recipe);
+        
+            if (recipe == null)
+            {
+                throw new RecipeDoesNotExistException();
+            }
+
+            return Ok(recipe);
+        }
+        catch (RecipeDoesNotExistException e)
+        {
+            _logger.LogError(e.InnerException, "Recipe '{@RecipeUuid}' does not exist", uuid);
+            return StatusCode(404, $"Recipe '{uuid}' does not exist");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Communication with repository failed");
+            return StatusCode(500, e.Message);
+        }
+    }
+
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Recipe))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bogus;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using RecipesDataProvider.API.Controllers;
 using RecipesDataProvider.API.Test.Integration.Fixtures;
 using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
-using RecipesDataProvider.Infrastructure.Exceptions;
 using Xunit;
 
 namespace RecipesDataProvider.API.Test.Integration.Controllers;
@@ -57,6 +55,39 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
         result.Should().BeOfType<ObjectResult>();
     }
 
+    [Fact]
+    public async Task GetRecipeByUuid_ReturnsRecipe_WhenUuidExists()
+    {
+        var recipesList = await _fixture.RecipeRepository.GetRecipes();
+        var recipeToGet = recipesList.First();
+        
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+        var result = await recipeController.GetRecipeByUuid(recipeToGet.Uuid);
+        var data = (OkObjectResult)result;
+
+        result.Should()
+            .BeOfType<OkObjectResult>()
+            .And
+            .BeAssignableTo<OkObjectResult>();
+        data.StatusCode.Should().Be(200);
+        data.Value.Should().BeEquivalentTo(recipeToGet);
+    }
+    
+    [Fact]
+    public async Task GetRecipeBeUuid_ReturnsStatusCode404_WhenRecipeDoesNotExists()
+    {
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+    
+        var result = await recipeController.GetRecipeByUuid(Guid.NewGuid());
+        var data = (ObjectResult)result;
+        
+        result.Should()
+            .BeOfType<ObjectResult>()
+            .And
+            .BeAssignableTo<ObjectResult>();
+        data.StatusCode.Should().Be(404);
+    }
+    
     [Fact]
     public async Task CreateRecipe_ReturnsStatusCode201_WhenServerRespondedWithCreatedAtActionResult()
     {
