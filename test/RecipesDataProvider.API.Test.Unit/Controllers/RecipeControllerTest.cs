@@ -63,6 +63,68 @@ public class RecipeControllerTest
             recipesCount.Should().Be(3);
         }
     }
+    
+    [Fact]
+    public async Task GetRecipeByUuid_Returns_OkObjectResult()
+    {
+        var recipeToGet = _recipeInMemoryDatabase.First();
+
+        _recipeRepositoryMock.Setup(r => r.GetRecipeByUuid(recipeToGet.Uuid))
+            .Returns((Guid uuid) =>
+            {
+                var recipe = _recipeInMemoryDatabase
+                    .SingleOrDefault(r => r.Uuid == uuid);
+
+                return Task.FromResult(recipe)!;
+            });
+
+        var response = await _recipeController.GetRecipeByUuid(recipeToGet.Uuid);
+    
+        using (new AssertionScope())
+        {
+            response.Should().BeOfType<OkObjectResult>();
+            response.Should().BeAssignableTo<OkObjectResult>();
+        }
+    }
+    
+    [Fact]
+    public async Task GetRecipeByUuid_ReturnsRecipe_WhenUuidExists()
+    {
+        var recipeToGet = _recipeInMemoryDatabase.First();
+
+        _recipeRepositoryMock.Setup(r => r.GetRecipeByUuid(recipeToGet.Uuid))
+            .Returns((Guid uuid) =>
+            {
+                var recipe = _recipeInMemoryDatabase
+                    .SingleOrDefault(r => r.Uuid == uuid);
+
+                return Task.FromResult(recipe)!;
+            });
+        
+        var response = await _recipeController.GetRecipeByUuid(recipeToGet.Uuid);
+        var result = Assert.IsType<OkObjectResult>(response);
+        var recipe = (Recipe)result.Value!;
+
+        recipe.Should().BeEquivalentTo(recipeToGet);
+    }
+    
+    [Fact]
+    public async Task GetRecipeByUuid_ReturnsStatusCode404_WhenUuidDoesNotExist()
+    {
+        _recipeRepositoryMock.Setup(r => r.GetRecipeByUuid(Guid.NewGuid()))
+            .Returns((Guid uuid) =>
+            {
+                var recipe = _recipeInMemoryDatabase
+                    .SingleOrDefault(r => r.Uuid == uuid);
+
+                return Task.FromResult(recipe)!;
+            });
+        
+        var response = await _recipeController.GetRecipeByUuid(Guid.NewGuid());
+        var result = (ObjectResult)response;
+
+        result.StatusCode.Should().Be(404);
+    }
 
     [Fact]
     public async Task CreateRecipe_Returns_CreatedAtActionResult()
