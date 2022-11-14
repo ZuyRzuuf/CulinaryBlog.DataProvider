@@ -9,7 +9,6 @@ using RecipesDataProvider.Domain.Dto;
 using RecipesDataProvider.Domain.Entities;
 using RecipesDataProvider.Infrastructure.Exceptions;
 using RecipesDataProvider.Infrastructure.Repositories;
-using RecipesDataProvider.Infrastructure.Test.Integration.Database.TestData;
 using RecipesDataProvider.Infrastructure.Test.Integration.Fixtures;
 using Xunit;
 
@@ -48,6 +47,84 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
 
         await sut.Invoking(r => r
             .GetRecipes()).Should().ThrowAsync<UnknownDatabaseException>();
+    }
+    
+    [Fact]
+    public async Task GetRecipesByTitle_ReturnsRecipesListWithTwoElements_WhenNoExceptionIsThrown()
+    {
+        const string recipesToFind = "Two Recipes to Get";
+        var sut = _fixture.Sut;
+        var recipesToCreate = new List<CreateRecipeDto>
+        {
+            new() { Title = $"{recipesToFind} {Guid.NewGuid().ToString()}" },
+            new() { Title = $"{recipesToFind} {Guid.NewGuid().ToString()}" }
+        };
+
+        await sut.CreateRecipe(recipesToCreate[0]);
+        await sut.CreateRecipe(recipesToCreate[1]);
+
+        var result = await sut.GetRecipesByTitle(recipesToFind);
+
+        result.Should()
+            .NotBeEmpty()
+            .And
+            .BeOfType<List<Recipe>>()
+            .And
+            .OnlyHaveUniqueItems()
+            .And
+            .NotContainNulls(r => r.Title)
+            .And
+            .HaveCount(2);
+    }
+    
+    [Fact]
+    public async Task GetRecipesByTitle_ReturnsRecipesListWithOneElement_WhenNoExceptionIsThrown()
+    {
+        var sut = _fixture.Sut;
+        var recipesToCreate = new List<CreateRecipeDto>
+        {
+            new() { Title = $"First Recipe to Get {Guid.NewGuid().ToString()}" },
+            new() { Title = $"Second Recipe to Get {Guid.NewGuid().ToString()}" }
+        };
+
+        await sut.CreateRecipe(recipesToCreate[0]);
+        await sut.CreateRecipe(recipesToCreate[1]);
+
+        var result = await sut.GetRecipesByTitle("Second Recipe to Get");
+
+        result.Should()
+            .NotBeEmpty()
+            .And
+            .BeOfType<List<Recipe>>()
+            .And
+            .OnlyHaveUniqueItems()
+            .And
+            .NotContainNulls(r => r.Title)
+            .And
+            .HaveCount(1);
+    }
+    
+    [Fact]
+    public async Task GetRecipesByTitle_ReturnsRecipesListWithoutElements_WhenNoExceptionIsThrown()
+    {
+        var sut = _fixture.Sut;
+        var result = await sut.GetRecipesByTitle("Non existing recipe");
+
+        result.Should()
+            .BeEmpty()
+            .And
+            .BeOfType<List<Recipe>>()
+            .And
+            .HaveCount(0);
+    }
+    
+    [Fact]
+    public async Task GetRecipesByTitle_ThrowsDatabaseConnectionProblemException_WhenDatabaseReturnsException()
+    {
+        var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
+    
+        await sut.Invoking(r => r
+            .GetRecipesByTitle("Some recipe")).Should().ThrowAsync<UnknownDatabaseException>();
     }
     
     [Fact]

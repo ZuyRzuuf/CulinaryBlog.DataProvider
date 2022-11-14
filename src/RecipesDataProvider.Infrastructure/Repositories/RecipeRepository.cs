@@ -81,6 +81,34 @@ public class RecipeRepository : IRecipeRepository
         }
     }
 
+    public async Task<IList<Recipe>> GetRecipesByTitle(string partialTitle)
+    {
+        try
+        {
+            const string query = "SELECT * FROM recipe WHERE title LIKE @PartialTitle";
+
+            var parameters = new DynamicParameters();
+            
+            parameters.Add("PartialTitle", "%" + partialTitle + "%", DbType.String);
+
+            using var connection = _mysqlContext.CreateConnection();
+
+            var result = await connection.QueryAsync<Recipe>(query, parameters);
+
+            return result.ToList();
+        }
+        catch (MySqlException e)
+        {
+            _logger.LogError(e.InnerException, "Unknown database");
+            throw new UnknownDatabaseException(e.Message, e.InnerException);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Problem with database connection occurs");
+            throw new DatabaseConnectionProblemException(e.Message, e.InnerException);
+        }
+    }
+
     public async Task<Recipe> CreateRecipe(CreateRecipeDto createRecipeDto)
     {
         try
