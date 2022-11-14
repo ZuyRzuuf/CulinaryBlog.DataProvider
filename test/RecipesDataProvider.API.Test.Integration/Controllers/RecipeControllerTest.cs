@@ -56,6 +56,84 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     }
 
     [Fact]
+    public async Task GetRecipesByTitle_ReturnsOkObjectResult_WhenNoExceptionIsThrown()
+    {
+        const string titleToFind = "Two Recipes to Find";
+        var recipesToFind = new List<CreateRecipeDto>
+        {
+            new() { Title = $"{titleToFind} {Guid.NewGuid()}" },
+            new() { Title = $"{titleToFind} {Guid.NewGuid()}" }
+        };
+        
+        await _fixture.RecipeRepository.CreateRecipe(recipesToFind[0]);
+        await _fixture.RecipeRepository.CreateRecipe(recipesToFind[1]);
+
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+        var result = await recipeController.GetRecipesByTitle(titleToFind);
+        var recipes = (OkObjectResult)result;
+
+        recipes.Should()
+            .BeOfType<OkObjectResult>()
+            .And
+            .NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetRecipesByTitle_ReturnsStatusCode200_WhenNoExceptionIsThrown()
+    {
+        const string titleToFind = "Two Recipes to Find";
+        var recipesToFind = new List<CreateRecipeDto>
+        {
+            new() { Title = $"{titleToFind} {Guid.NewGuid()}" },
+            new() { Title = $"{titleToFind} {Guid.NewGuid()}" }
+        };
+        
+        await _fixture.RecipeRepository.CreateRecipe(recipesToFind[0]);
+        await _fixture.RecipeRepository.CreateRecipe(recipesToFind[1]);
+
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+        var result = await recipeController.GetRecipesByTitle(titleToFind);
+        var recipes = (OkObjectResult)result;
+
+        recipes.StatusCode.Should().Be(200);
+    }
+
+    [Fact]
+    public async Task GetRecipesByTitle_ReturnsTypeRecipeList_WhenNoExceptionIsThrown()
+    {
+        var titleToFind = $"{Guid.NewGuid()} Recipes to Find";
+        var recipesToFind = new List<CreateRecipeDto>
+        {
+            new() { Title = $"{titleToFind} {Guid.NewGuid()}" },
+            new() { Title = $"{titleToFind} {Guid.NewGuid()}" }
+        };
+        
+        await _fixture.RecipeRepository.CreateRecipe(recipesToFind[0]);
+        await _fixture.RecipeRepository.CreateRecipe(recipesToFind[1]);
+
+        var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
+        var result = await recipeController.GetRecipesByTitle(titleToFind);
+        var recipes = (OkObjectResult)result;
+
+        recipes.Value.Should()
+            .BeOfType<List<Recipe>>()
+            .And
+            .BeEquivalentTo(recipesToFind);
+    }
+
+    [Fact]
+    public async Task GetRecipesByTitle_ReturnsStatusCode500ButNotThrowsException_WhenServerThrowsException()
+    {
+        var recipeController = new RecipeController(_fixture.RecipeRepositoryThrowingException, _fixture.RecipeControllerLogger);
+        var result = await recipeController.GetRecipesByTitle("Some title");
+        var data = (ObjectResult)result;
+
+        Action act = () => data.StatusCode.Should().Be(500);
+        act.Should().NotThrow();
+        result.Should().BeOfType<ObjectResult>();
+    }
+
+    [Fact]
     public async Task GetRecipeByUuid_ReturnsRecipe_WhenUuidExists()
     {
         var recipesList = await _fixture.RecipeRepository.GetRecipes();

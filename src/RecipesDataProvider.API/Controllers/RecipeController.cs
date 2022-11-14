@@ -37,6 +37,25 @@ public class RecipeController : ControllerBase
         }
     }
 
+    [HttpGet("{partialTitle}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<Recipe>))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetRecipesByTitle(string partialTitle)
+    {
+        try
+        {
+            var recipes = await _recipeRepository.GetRecipesByTitle(partialTitle);
+            _logger.LogInformation("GetRecipesByTitle returns {@Recipes}", recipes);
+
+            return Ok(recipes);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Communication with repository failed");
+            return StatusCode(500, e.Message);
+        }
+    }
+
     [HttpGet("{uuid:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Recipe))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

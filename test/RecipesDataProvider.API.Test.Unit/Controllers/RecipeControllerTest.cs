@@ -125,6 +125,107 @@ public class RecipeControllerTest
 
         result.StatusCode.Should().Be(404);
     }
+    
+    [Fact]
+    public async Task GetRecipesByTitle_ReturnsOkObjectResult_WhenTitleIsMatched()
+    {
+        const string recipesToFind = "recipe to get";
+        
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = "First recipe to get", Uuid = Guid.NewGuid() });
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Uuid = Guid.NewGuid() });
+
+        _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipesToFind))
+            .Returns((string partialTitle) =>
+            {
+                var recipeInMemoryDatabase = _recipeInMemoryDatabase as List<Recipe>;
+                
+                var recipe = recipeInMemoryDatabase!
+                    .Where(r => r.Title!.Contains(partialTitle))
+                    .Select(r =>
+                    {
+                        r.Title!.Contains(partialTitle);
+
+                        return r;
+                    })
+                    .ToList();
+    
+                return Task.FromResult((IList<Recipe>)recipe);
+            });
+    
+        var response = await _recipeController.GetRecipesByTitle(recipesToFind);
+    
+        using (new AssertionScope())
+        {
+            response.Should().BeOfType<OkObjectResult>();
+            response.Should().BeAssignableTo<OkObjectResult>();
+        }
+    }
+    
+    [Fact]
+    public async Task GetRecipesByTitle_ReturnsRecipe_WhenTitleIsMatched()
+    {
+        const string recipeTitleToFind = "First recipe to get";
+
+        var recipeToFind = new Recipe() { Title = "First recipe to get", Uuid = Guid.NewGuid() };
+        
+        _recipeInMemoryDatabase.Add(recipeToFind);
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Uuid = Guid.NewGuid() });
+
+        _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipeTitleToFind))
+            .Returns((string partialTitle) =>
+            {
+                var recipeInMemoryDatabase = _recipeInMemoryDatabase as List<Recipe>;
+                
+                var recipe = recipeInMemoryDatabase!
+                    .Where(r => r.Title!.Contains(partialTitle))
+                    .Select(r =>
+                    {
+                        r.Title!.Contains(partialTitle);
+
+                        return r;
+                    })
+                    .ToList();
+    
+                return Task.FromResult((IList<Recipe>)recipe);
+            });
+        
+        var response = await _recipeController.GetRecipesByTitle(recipeTitleToFind);
+        var result = Assert.IsType<OkObjectResult>(response);
+        var recipe = (List<Recipe>)result.Value!;
+
+        recipe.Should().HaveCount(1);
+        recipe[0].Should().BeEquivalentTo(recipeToFind);
+    }
+    
+    [Fact]
+    public async Task GetRecipeByTitle_ReturnsStatusCode200AndEmptyList_WhenTitleNotMatched()
+    {
+        const string recipeTitleToFind = "First recipe to get";
+
+        _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipeTitleToFind))
+            .Returns((string partialTitle) =>
+            {
+                var recipeInMemoryDatabase = _recipeInMemoryDatabase as List<Recipe>;
+                
+                var recipe = recipeInMemoryDatabase!
+                    .Where(r => r.Title!.Contains(partialTitle))
+                    .Select(r =>
+                    {
+                        r.Title!.Contains(partialTitle);
+
+                        return r;
+                    })
+                    .ToList();
+    
+                return Task.FromResult((IList<Recipe>)recipe);
+            });
+        
+        var response = await _recipeController.GetRecipesByTitle(recipeTitleToFind);
+        var result = Assert.IsType<OkObjectResult>(response);
+
+        result.Value.Should().BeOfType<List<Recipe>>();
+        result.StatusCode.Should().Be(200);
+    }
 
     [Fact]
     public async Task CreateRecipe_Returns_CreatedAtActionResult()
