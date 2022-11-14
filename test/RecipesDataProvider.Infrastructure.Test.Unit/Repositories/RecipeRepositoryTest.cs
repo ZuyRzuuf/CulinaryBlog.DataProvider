@@ -44,6 +44,114 @@ public class RecipeRepositoryTest
     }
 
     [Fact]
+    public async Task GetRecipesByTitle_ReturnsTwoRecipes_WhenPartOfTitleMatch()
+    {
+        const string recipesToFind = "recipe to get";
+        
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = "First recipe to get", Uuid = Guid.NewGuid() });
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Uuid = Guid.NewGuid() });
+        
+        _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipesToFind))
+            .Returns((string partialTitle) =>
+            {
+                var recipeInMemoryDatabase = _recipeInMemoryDatabase as List<Recipe>;
+                
+                var recipes = recipeInMemoryDatabase!
+                    .Where(r => r.Title!.Contains(partialTitle))
+                    .Select(r =>
+                    {
+                        r.Title!.Contains(partialTitle);
+
+                        return r;
+                    }).ToList();
+                
+                var result = Task.FromResult((IList<Recipe>)recipes);
+
+                return result;
+            });
+
+        var actual = await _recipeRepositoryMock.Object.GetRecipesByTitle(recipesToFind);
+
+        actual.Should()
+            .BeOfType<List<Recipe>>()
+            .And
+            .NotBeNull()
+            .And
+            .HaveCount(2);
+    }
+
+    [Fact]
+    public async Task GetRecipesByTitle_ReturnsOneRecipe_WhenWholeTitleMatch()
+    {
+        const string recipesToFind = "First recipe to get";
+        
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = recipesToFind, Uuid = Guid.NewGuid() });
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Uuid = Guid.NewGuid() });
+        
+        _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipesToFind))
+            .Returns((string partialTitle) =>
+            {
+                var recipeInMemoryDatabase = _recipeInMemoryDatabase as List<Recipe>;
+                
+                var recipes = recipeInMemoryDatabase!
+                    .Where(r => r.Title!.Contains(partialTitle))
+                    .Select(r =>
+                    {
+                        r.Title!.Contains(partialTitle);
+
+                        return r;
+                    }).ToList();
+                
+                var result = Task.FromResult((IList<Recipe>)recipes);
+
+                return result;
+            });
+
+        var actual = await _recipeRepositoryMock.Object.GetRecipesByTitle(recipesToFind);
+
+        actual.Should()
+            .BeOfType<List<Recipe>>()
+            .And
+            .NotBeNull()
+            .And
+            .HaveCount(1);
+    }
+
+    [Fact]
+    public async Task GetRecipesByTitle_ReturnsEmptyList_WhenNoTitleMatch()
+    {
+        const string recipesToFind = "Non existing recipe";
+        
+        _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipesToFind))
+            .Returns((string partialTitle) =>
+            {
+                var recipeInMemoryDatabase = _recipeInMemoryDatabase as List<Recipe>;
+                
+                var recipes = recipeInMemoryDatabase!
+                    .Where(r => r.Title!.Contains(partialTitle))
+                    .Select(r =>
+                    {
+                        r.Title!.Contains(partialTitle);
+
+                        return r;
+                    }).ToList();
+                
+                var result = Task.FromResult((IList<Recipe>)recipes);
+
+                return result;
+            });
+
+        var actual = await _recipeRepositoryMock.Object.GetRecipesByTitle(recipesToFind);
+
+        actual.Should()
+            .BeOfType<List<Recipe>>()
+            .And
+            .BeEmpty()
+            .And
+            .HaveCount(0);
+    }
+
+    [Fact]
     public async Task GetRecipesByUuid_ReturnsRecipe_WhenUuidExists()
     {
         var recipeToGet = _recipeInMemoryDatabase.First();
