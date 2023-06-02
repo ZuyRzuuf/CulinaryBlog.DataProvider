@@ -1,3 +1,23 @@
+# ignore files inside mysql-dev folder 
+docker/mysql-dev/*
+#but not .gitkeep file
+!docker/mysql-dev/.gitkeep
+
+# ignore files inside mysql-test folder 
+docker/mysql-test/*
+#but not .gitkeep file
+!docker/mysql-test/.gitkeep
+
+# ignore files inside seq folder 
+docker/seq/*
+#but not .gitkeep file
+!docker/seq/.gitkeep
+
+# ignore files inside logs folder 
+src/logs/*
+#but not .gitkeep file
+!src/logs/.gitkeep
+
 # JetBrains
 .idea/
 **/[Bb]in/
