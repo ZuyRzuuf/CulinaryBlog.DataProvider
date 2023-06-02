@@ -3,7 +3,7 @@ version: '3.8'
 services:
   seq:
     image: datalust/seq:2023.1
-    container_name: seq
+    container_name: culinary-blog-recipe-seq
     ports:
       - "5340:80"
       - "5341:5341"
@@ -12,10 +12,12 @@ services:
       - SEQ_LICENSE=trial
     volumes:
       - ./seq:/data
+    networks: 
+      - culinary-blog-recipe-provider
 
   mysql-dev:
     image: mysql:8.0.25
-    container_name: mysql-dev
+    container_name: culinary-blog-recipe-mysql-dev
     restart: always
     ports:
       - "3316:3306"
@@ -26,10 +28,12 @@ services:
       MYSQL_PASSWORD: developer
     volumes:
       - ./mysql-dev:/var/lib/mysql
+    networks:
+      - culinary-blog-recipe-provider
 
   mysql-test:
     image: mysql:8.0.25
-    container_name: mysql-test
+    container_name: culinary-blog-recipe-mysql-test
     restart: always
     ports:
       - "3317:3306"
@@ -40,4 +44,8 @@ services:
       MYSQL_PASSWORD: developer
     volumes:
       - ./mysql-test:/var/lib/mysql
+    networks:
+      - culinary-blog-recipe-provider
         
+networks:
+  culinary-blog-recipe-provider:
