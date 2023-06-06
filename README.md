@@ -1,7 +1,7 @@
-# CulinaryBlog.RecipesDataProvider
+# CulinaryBlog.DataProvider
 Microservice is a part of CulinaryBlog Application. 
-Works as a data provider for culinary blog recipes.
-Uses connection to CulinaryBlog DB to get recipes data.
+Works as a data provider for culinary blog.
+Uses connection to CulinaryBlog DB to get data.
 Is not accessible from the Internet. 
 
 ## Code
