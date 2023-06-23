@@ -13,30 +13,30 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 COPY *.sln .
 
 WORKDIR /src
-COPY src/RecipesDataProvider.API/*.csproj ./RecipesDataProvider.API/
-COPY src/RecipesDataProvider.Domain/*.csproj ./RecipesDataProvider.Domain/
-COPY src/RecipesDataProvider.Infrastructure/*.csproj ./RecipesDataProvider.Infrastructure/
+COPY src/DataProvider.API/*.csproj ./DataProvider.API/
+COPY src/DataProvider.Domain/*.csproj ./DataProvider.Domain/
+COPY src/DataProvider.Infrastructure/*.csproj ./DataProvider.Infrastructure/
 
 WORKDIR /test
-COPY test/RecipesDataProvider.API.Test.Integration/*.csproj ./RecipesDataProvider.API.Test.Integration/
-COPY test/RecipesDataProvider.API.Test.Unit/*.csproj ./RecipesDataProvider.API.Test.Unit/
-COPY test/RecipesDataProvider.Domain.Test.Integration/*.csproj ./RecipesDataProvider.Domain.Test.Integration/
-COPY test/RecipesDataProvider.Domain.Test.Unit/*.csproj ./RecipesDataProvider.Domain.Test.Unit/
-COPY test/RecipesDataProvider.Infrastructure.Test.Integration/*.csproj ./RecipesDataProvider.Infrastructure.Test.Integration/
-COPY test/RecipesDataProvider.Infrastructure.Test.Unit/*.csproj ./RecipesDataProvider.Infrastructure.Test.Unit/
+COPY test/DataProvider.API.Test.Integration/*.csproj ./DataProvider.API.Test.Integration/
+COPY test/DataProvider.API.Test.Unit/*.csproj ./DataProvider.API.Test.Unit/
+COPY test/DataProvider.Domain.Test.Integration/*.csproj ./DataProvider.Domain.Test.Integration/
+COPY test/DataProvider.Domain.Test.Unit/*.csproj ./DataProvider.Domain.Test.Unit/
+COPY test/DataProvider.Infrastructure.Test.Integration/*.csproj ./DataProvider.Infrastructure.Test.Integration/
+COPY test/DataProvider.Infrastructure.Test.Unit/*.csproj ./DataProvider.Infrastructure.Test.Unit/
 
 WORKDIR /
 RUN dotnet restore
 
 COPY . .
 
-WORKDIR /src/RecipesDataProvider.API
+WORKDIR /src/DataProvider.API
 RUN dotnet build -c Release -o /app
 
-WORKDIR /src/RecipesDataProvider.Domain
+WORKDIR /src/DataProvider.Domain
 RUN dotnet build -c Release -o /app
 
-WORKDIR /src/RecipesDataProvider.Infrastructure
+WORKDIR /src/DataProvider.Infrastructure
 RUN dotnet build -c Release -o /app
 
 FROM build AS publish
@@ -47,4 +47,4 @@ FROM base AS runtime
 WORKDIR /app
 COPY --from=publish /app .
 
-ENTRYPOINT ["dotnet", "RecipesDataProvider.API.dll"]
+ENTRYPOINT ["dotnet", "DataProvider.API.dll"]
