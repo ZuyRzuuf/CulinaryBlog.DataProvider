@@ -6,7 +6,8 @@ using DataProvider.Infrastructure.Exceptions;
 
 namespace DataProvider.API.Controllers;
 
-[Route("v1/[controller]")]
+[ApiController]
+[Route("v1/recipes")]
 public class RecipeController : ControllerBase
 {
     private readonly IRecipeRepository _recipeRepository;
