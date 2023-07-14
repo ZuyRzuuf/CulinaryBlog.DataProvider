@@ -44,15 +44,15 @@ public class RecipeRepository : IRecipeRepository
         }
     }
 
-    public async Task<Recipe> GetRecipeByUuid(Guid uuid)
+    public async Task<Recipe> GetRecipeById(Guid id)
     {
         try
         {
-            const string query = "SELECT * FROM recipe WHERE uuid = @Uuid";
+            const string query = "SELECT * FROM recipe WHERE id = @Id";
 
             var parameters = new DynamicParameters();
             
-            parameters.Add("Uuid", uuid, DbType.Guid);
+            parameters.Add("Id", id, DbType.Guid);
 
             using var connection = _mysqlContext.CreateConnection();
 
@@ -66,7 +66,7 @@ public class RecipeRepository : IRecipeRepository
         }
         catch (RecipeDoesNotExistException e)
         {
-            _logger.LogError(e.InnerException, "Recipe '{@Uuid}' doesn't exist", uuid);
+            _logger.LogError(e.InnerException, "Recipe '{@Id}' doesn't exist", id);
             throw;
         }
         catch (MySqlException e)
@@ -113,13 +113,13 @@ public class RecipeRepository : IRecipeRepository
     {
         try
         {
-            const string query = "INSERT INTO recipe (uuid, title) VALUES (@Uuid, @Title)";
+            const string query = "INSERT INTO recipe (id, title) VALUES (@Id, @Title)";
         
-            var uuid = Guid.NewGuid();
+            var id = Guid.NewGuid();
             var title = createRecipeDto.Title;
             var parameters = new DynamicParameters();
         
-            parameters.Add("Uuid", uuid);
+            parameters.Add("Id", id);
             parameters.Add("Title", title);
 
             using var connection = _mysqlContext.CreateConnection();
@@ -128,7 +128,7 @@ public class RecipeRepository : IRecipeRepository
 
             return new Recipe
             {
-                Uuid = uuid,
+                Id = id,
                 Title = title
             };
         }
@@ -154,13 +154,13 @@ public class RecipeRepository : IRecipeRepository
     {
         try
         {
-            const string query = "UPDATE recipe SET title = @Title WHERE uuid = @Uuid";
+            const string query = "UPDATE recipe SET title = @Title WHERE id = @Id";
 
-            var uuid = updateRecipeDto.Uuid;
+            var id = updateRecipeDto.Id;
             var title = updateRecipeDto.Title;
             var parameters = new DynamicParameters();
         
-            parameters.Add("Uuid", uuid);
+            parameters.Add("Id", id);
             parameters.Add("Title", title);
 
             using var connection = _mysqlContext.CreateConnection();
@@ -188,14 +188,14 @@ public class RecipeRepository : IRecipeRepository
         }
     }
 
-    public async Task<int> DeleteRecipe(Guid uuid)
+    public async Task<int> DeleteRecipe(Guid id)
     {
         try
         {
-            const string query = "DELETE FROM recipe WHERE uuid = @Uuid";
+            const string query = "DELETE FROM recipe WHERE id = @Id";
 
             var parameters = new DynamicParameters();
-            parameters.Add("Uuid", uuid, DbType.Guid);
+            parameters.Add("Id", id, DbType.Guid);
 
             using var connection = _mysqlContext.CreateConnection();
 
@@ -207,7 +207,7 @@ public class RecipeRepository : IRecipeRepository
         }
         catch (RecipeDoesNotExistException e)
         {
-            _logger.LogError(e.InnerException, "Recipe '{@Uuid}' doesn't exist", uuid);
+            _logger.LogError(e.InnerException, "Recipe '{@Id}' doesn't exist", id);
             throw;
         }
         catch (MySqlException e)

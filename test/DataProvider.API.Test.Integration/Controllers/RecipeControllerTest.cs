@@ -134,13 +134,13 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     }
 
     [Fact]
-    public async Task GetRecipeByUuid_ReturnsRecipe_WhenUuidExists()
+    public async Task GetRecipeById_ReturnsRecipe_WhenIdExists()
     {
         var recipesList = await _fixture.RecipeRepository.GetRecipes();
         var recipeToGet = recipesList.First();
         
         var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
-        var result = await recipeController.GetRecipeByUuid(recipeToGet.Uuid);
+        var result = await recipeController.GetRecipeById(recipeToGet.Id);
         var data = (OkObjectResult)result;
 
         result.Should()
@@ -152,11 +152,11 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     }
     
     [Fact]
-    public async Task GetRecipeBeUuid_ReturnsStatusCode404_WhenRecipeDoesNotExists()
+    public async Task GetRecipeBeId_ReturnsStatusCode404_WhenRecipeDoesNotExists()
     {
         var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
     
-        var result = await recipeController.GetRecipeByUuid(Guid.NewGuid());
+        var result = await recipeController.GetRecipeById(Guid.NewGuid());
         var data = (ObjectResult)result;
         
         result.Should()
@@ -196,7 +196,7 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
 
         result.Value.Should().BeOfType<Recipe>();
         result.RouteValues.Should()
-            .ContainKeys("Uuid", "Title")
+            .ContainKeys("Id", "Title")
             .And
             .Contain("Title", recipeDto.Title);
         createdRecipe.Title.Should().Be(recipeDto.Title);
@@ -209,7 +209,7 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
         var recipeToUpdate = recipesList.First();
         var recipeDto = new UpdateRecipeDto
         {
-            Uuid = recipeToUpdate.Uuid,
+            Id = recipeToUpdate.Id,
             Title = new Bogus.DataSets.Lorem().Sentences(2)
         };
         
@@ -229,7 +229,7 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     {
         var recipeDto = new UpdateRecipeDto
         {
-            Uuid = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Title = new Bogus.DataSets.Lorem().Sentences(2)
         };
         
@@ -252,7 +252,7 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
         var recipeToDelete = recipesList.First();
         
         var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
-        var result = await recipeController.DeleteRecipe(recipeToDelete.Uuid);
+        var result = await recipeController.DeleteRecipe(recipeToDelete.Id);
         var data = (NoContentResult)result;
     
         result.Should()

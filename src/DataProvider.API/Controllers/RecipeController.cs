@@ -57,16 +57,16 @@ public class RecipeController : ControllerBase
         }
     }
 
-    [HttpGet("{uuid:guid}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Recipe))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetRecipeByUuid(Guid uuid)
+    public async Task<IActionResult> GetRecipeById(Guid id)
     {
         try
         {
-            var recipe = await _recipeRepository.GetRecipeByUuid(uuid); 
-            _logger.LogInformation("GetRecipeByUuid returns {@Recipe}", recipe);
+            var recipe = await _recipeRepository.GetRecipeById(id); 
+            _logger.LogInformation("GetRecipeById returns {@Recipe}", recipe);
         
             if (recipe == null)
             {
@@ -77,8 +77,8 @@ public class RecipeController : ControllerBase
         }
         catch (RecipeDoesNotExistException e)
         {
-            _logger.LogError(e.InnerException, "Recipe '{@RecipeUuid}' does not exist", uuid);
-            return StatusCode(404, $"Recipe '{uuid}' does not exist");
+            _logger.LogError(e.InnerException, "Recipe '{@RecipeId}' does not exist", id);
+            return StatusCode(404, $"Recipe '{id}' does not exist");
         }
         catch (Exception e)
         {
@@ -99,7 +99,7 @@ public class RecipeController : ControllerBase
 
             return CreatedAtAction(
                 nameof(GetRecipes), 
-                new {uuid = recipe.Uuid, title = recipe.Title}, 
+                new {id = recipe.Id, title = recipe.Title}, 
                 recipe);
         }
         catch (Exception e)
@@ -129,8 +129,8 @@ public class RecipeController : ControllerBase
         }
         catch (RecipeDoesNotExistException e)
         {
-            _logger.LogError(e.InnerException, "Recipe '{@RecipeUuid}' does not exist", recipeDto.Uuid);
-            return StatusCode(404, $"Recipe '{recipeDto.Uuid}' does not exist");
+            _logger.LogError(e.InnerException, "Recipe '{@RecipeId}' does not exist", recipeDto.Id);
+            return StatusCode(404, $"Recipe '{recipeDto.Id}' does not exist");
         }
         catch (Exception e)
         {
@@ -143,11 +143,11 @@ public class RecipeController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteRecipe(Guid uuid)
+    public async Task<IActionResult> DeleteRecipe(Guid id)
     {
         try
         {
-            var response = await _recipeRepository.DeleteRecipe(uuid);
+            var response = await _recipeRepository.DeleteRecipe(id);
 
             if (response == 0)
                 throw new RecipeDoesNotExistException();
@@ -156,8 +156,8 @@ public class RecipeController : ControllerBase
         }
         catch (RecipeDoesNotExistException e)
         {
-            _logger.LogError(e.InnerException, "Recipe '{@Uuid}' does not exist", uuid);
-            return StatusCode(404, $"Recipe '{uuid}' does not exist");
+            _logger.LogError(e.InnerException, "Recipe '{@Id}' does not exist", id);
+            return StatusCode(404, $"Recipe '{id}' does not exist");
         }
         catch (Exception e)
         {
