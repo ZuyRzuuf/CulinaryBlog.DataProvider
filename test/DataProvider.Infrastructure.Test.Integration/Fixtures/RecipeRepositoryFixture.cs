@@ -43,7 +43,7 @@ public class RecipeRepositoryFixture : DatabaseSetupFixture, IDisposable
 
     private async Task AddRecipesData()
     {
-        const string query = "INSERT INTO recipe (uuid, title) VALUES (@Uuid, @Title)";
+        const string query = "INSERT INTO recipe (id, title) VALUES (@Id, @Title)";
 
         await using var connection = new MySqlConnection(ConnectionStringToSchema);
         await connection.ExecuteAsync(query, RecipesCollection);

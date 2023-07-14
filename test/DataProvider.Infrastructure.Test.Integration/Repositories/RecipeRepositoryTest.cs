@@ -128,13 +128,13 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
     }
     
     [Fact]
-    public async Task GetRecipeByUuid_ReturnsRecipe_WhenRecipeExists()
+    public async Task GetRecipeById_ReturnsRecipe_WhenRecipeExists()
     {
         var sut = _fixture.Sut;
         var recipes = await sut.GetRecipes();
         var recipeToGet = recipes.First();
 
-        var result = await sut.GetRecipeByUuid(recipeToGet.Uuid);
+        var result = await sut.GetRecipeById(recipeToGet.Id);
     
         result.Should()
             .NotBeNull()
@@ -145,21 +145,21 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
     }
     
     [Fact]
-    public async Task GetRecipeByUuid_ThrowsRecipeDoesNotExistException_WhenRecipeDoesNotExist()
+    public async Task GetRecipeById_ThrowsRecipeDoesNotExistException_WhenRecipeDoesNotExist()
     {
         var sut = _fixture.Sut;
 
         await sut.Invoking(r => r
-            .GetRecipeByUuid(Guid.NewGuid())).Should().ThrowAsync<RecipeDoesNotExistException>();
+            .GetRecipeById(Guid.NewGuid())).Should().ThrowAsync<RecipeDoesNotExistException>();
     }
     
     [Fact]
-    public async Task GetRecipeByUuid_ThrowsDatabaseConnectionProblemException_WhenDatabaseReturnsException()
+    public async Task GetRecipeById_ThrowsDatabaseConnectionProblemException_WhenDatabaseReturnsException()
     {
         var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
     
         await sut.Invoking(r => r
-            .GetRecipeByUuid(Guid.NewGuid())).Should().ThrowAsync<UnknownDatabaseException>();
+            .GetRecipeById(Guid.NewGuid())).Should().ThrowAsync<UnknownDatabaseException>();
     }
 
     [Fact]
@@ -215,7 +215,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
         var recipeToUpdate = baseRecipesList.First();
         var recipeDto = new UpdateRecipeDto
         {
-            Uuid = recipeToUpdate.Uuid,
+            Id = recipeToUpdate.Id,
             Title = new Bogus.DataSets.Lorem().Sentence(2)
         };
 
@@ -232,7 +232,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
         var recipeToUpdate = baseRecipesList.First();
         var recipeDto = new UpdateRecipeDto
         {
-            Uuid = recipeToUpdate.Uuid,
+            Id = recipeToUpdate.Id,
             Title = new Bogus.DataSets.Lorem().Sentence(2)
         };
 
@@ -253,7 +253,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
         var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
         var recipeDto = new UpdateRecipeDto
         {
-            Uuid = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Title = new Bogus.DataSets.Lorem().Sentence(2)
         };
 
@@ -267,7 +267,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
         var sut = _fixture.Sut;
         var recipeDto = new UpdateRecipeDto
         {
-            Uuid = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Title = new Bogus.DataSets.Lorem().Sentence(2)
         };
 
@@ -282,7 +282,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
         var baseRecipesList = await sut.GetRecipes();
         var recipeToDelete = baseRecipesList.First();
     
-        var response = await sut.DeleteRecipe(recipeToDelete.Uuid);
+        var response = await sut.DeleteRecipe(recipeToDelete.Id);
     
         response.Should().Be(1);
     }
@@ -294,7 +294,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
         var baseRecipesList = await sut.GetRecipes();
         var recipeToDelete = baseRecipesList.First();
     
-        await sut.DeleteRecipe(recipeToDelete.Uuid);
+        await sut.DeleteRecipe(recipeToDelete.Id);
         var deletedRecipesList = await sut.GetRecipes();
 
         deletedRecipesList.Should()
@@ -303,26 +303,26 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
             .NotContain(recipeToDelete)
             .And
             .NotBeEquivalentTo(baseRecipesList);
-        deletedRecipesList.Select(r => r.Uuid).Should().NotEqual(baseRecipesList.Select(r => r.Uuid));
+        deletedRecipesList.Select(r => r.Id).Should().NotEqual(baseRecipesList.Select(r => r.Id));
     }
     
     [Fact]
     public async Task DeleteRecipe_ThrowsMySqlException_WhenDatabaseReturnsException()
     {
         var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
-        var uuid = Guid.NewGuid();
+        var id = Guid.NewGuid();
     
         await sut.Invoking(r => r
-            .DeleteRecipe(uuid)).Should().ThrowAsync<MySqlException>();
+            .DeleteRecipe(id)).Should().ThrowAsync<MySqlException>();
     }
     
     [Fact]
     public async Task DeleteRecipe_ThrowsRecipeDoesNotExistException_WhenRecipeToDeleteDoesNotExist()
     {
         var sut = _fixture.Sut;
-        var uuid = Guid.NewGuid();
+        var id = Guid.NewGuid();
     
         await sut.Invoking(r => r
-            .DeleteRecipe(uuid)).Should().ThrowAsync<RecipeDoesNotExistException>();
+            .DeleteRecipe(id)).Should().ThrowAsync<RecipeDoesNotExistException>();
     }
 }

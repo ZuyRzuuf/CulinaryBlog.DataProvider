@@ -22,9 +22,9 @@ public class RecipeRepositoryTest
         _recipeRepositoryMock = new Mock<IRecipeRepository>();
         _recipeInMemoryDatabase = new List<Recipe>
         {
-            new() { Uuid = Guid.Parse("ab24fde6-495b-45b6-be3c-1343939b646a"), Title = "Recipe 1" },
-            new() { Uuid = Guid.Parse("fe0efe1e-eab7-4ca4-a059-e51de04b0eed"), Title = "Recipe 2" },
-            new() { Uuid = Guid.Parse("a4f5ceb4-3d74-444f-a05f-57e8cfd42061"), Title = "Recipe 3" },
+            new() { Id = Guid.Parse("ab24fde6-495b-45b6-be3c-1343939b646a"), Title = "Recipe 1" },
+            new() { Id = Guid.Parse("fe0efe1e-eab7-4ca4-a059-e51de04b0eed"), Title = "Recipe 2" },
+            new() { Id = Guid.Parse("a4f5ceb4-3d74-444f-a05f-57e8cfd42061"), Title = "Recipe 3" },
         };
     }
 
@@ -48,8 +48,8 @@ public class RecipeRepositoryTest
     {
         const string recipesToFind = "recipe to get";
         
-        _recipeInMemoryDatabase.Add(new Recipe() { Title = "First recipe to get", Uuid = Guid.NewGuid() });
-        _recipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Uuid = Guid.NewGuid() });
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = "First recipe to get", Id = Guid.NewGuid() });
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Id = Guid.NewGuid() });
         
         _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipesToFind))
             .Returns((string partialTitle) =>
@@ -85,8 +85,8 @@ public class RecipeRepositoryTest
     {
         const string recipesToFind = "First recipe to get";
         
-        _recipeInMemoryDatabase.Add(new Recipe() { Title = recipesToFind, Uuid = Guid.NewGuid() });
-        _recipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Uuid = Guid.NewGuid() });
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = recipesToFind, Id = Guid.NewGuid() });
+        _recipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Id = Guid.NewGuid() });
         
         _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipesToFind))
             .Returns((string partialTitle) =>
@@ -152,44 +152,44 @@ public class RecipeRepositoryTest
     }
 
     [Fact]
-    public async Task GetRecipesByUuid_ReturnsRecipe_WhenUuidExists()
+    public async Task GetRecipesById_ReturnsRecipe_WhenIdExists()
     {
         var recipeToGet = _recipeInMemoryDatabase.First();
-        _recipeRepositoryMock.Setup(r => r.GetRecipeByUuid(recipeToGet.Uuid))
-            .Returns((Guid uuid) =>
+        _recipeRepositoryMock.Setup(r => r.GetRecipeById(recipeToGet.Id))
+            .Returns((Guid id) =>
             {
                 var recipe = _recipeInMemoryDatabase
-                    .SingleOrDefault(r => r.Uuid == uuid);
+                    .SingleOrDefault(r => r.Id == id);
 
                 return Task.FromResult(recipe)!;
             });
                 
 
-        var actual = await _recipeRepositoryMock.Object.GetRecipeByUuid(recipeToGet.Uuid);
+        var actual = await _recipeRepositoryMock.Object.GetRecipeById(recipeToGet.Id);
 
         using (new AssertionScope())
         {
             actual.Should().BeOfType<Recipe>();
             actual.Title.Should().Be(recipeToGet.Title);
-            actual.Uuid.Should().Be(recipeToGet.Uuid);
+            actual.Id.Should().Be(recipeToGet.Id);
         }
     }
 
     [Fact]
-    public async Task GetRecipesByUuid_ThrowsRecipeDoesNotExistException_WhenUuidDoesNotExists()
+    public async Task GetRecipesById_ThrowsRecipeDoesNotExistException_WhenIdDoesNotExists()
     {
         var recipeToGet = Guid.NewGuid();
         
-        _recipeRepositoryMock.Setup(r => r.GetRecipeByUuid(recipeToGet))
-            .Returns((Guid uuid) =>
+        _recipeRepositoryMock.Setup(r => r.GetRecipeById(recipeToGet))
+            .Returns((Guid id) =>
             {
                 var recipe = _recipeInMemoryDatabase
-                    .SingleOrDefault(r => r.Uuid == uuid);
+                    .SingleOrDefault(r => r.Id == id);
 
                 return Task.FromResult(recipe)!;
             });
 
-        var actual = await _recipeRepositoryMock.Object.GetRecipeByUuid(recipeToGet);
+        var actual = await _recipeRepositoryMock.Object.GetRecipeById(recipeToGet);
 
         actual.Should().BeNull();
     }
@@ -201,7 +201,7 @@ public class RecipeRepositoryTest
         {
             Title = "Newly created Recipe"
         };
-        var uuid = Guid.NewGuid();
+        var id = Guid.NewGuid();
         var numberRecipesInDatabase = _recipeInMemoryDatabase.Count;
         
         _recipeRepositoryMock.Setup(r => r.CreateRecipe(recipeDto))
@@ -209,7 +209,7 @@ public class RecipeRepositoryTest
             {
                 var recipe = new Recipe
                 {
-                    Uuid = uuid,
+                    Id = id,
                     Title = dto.Title
                 };
                 
@@ -226,7 +226,7 @@ public class RecipeRepositoryTest
                 .NotBeNull()
                 .And
                 .BeOfType<Recipe>();
-            createdRecipe.Uuid.Should().Be(uuid);
+            createdRecipe.Id.Should().Be(id);
             createdRecipe.Title.Should().Be(recipeDto.Title);
             _recipeInMemoryDatabase.Should()
                 .HaveCount(numberRecipesInDatabase + 1)
@@ -241,7 +241,7 @@ public class RecipeRepositoryTest
         var recipeToUpdate = _recipeInMemoryDatabase.First();
         var recipeDto = new UpdateRecipeDto
         {
-            Uuid = recipeToUpdate.Uuid,
+            Id = recipeToUpdate.Id,
             Title = "Updated title"
         };
 
@@ -249,7 +249,7 @@ public class RecipeRepositoryTest
             .Returns((UpdateRecipeDto dto) =>
             {
                 var enumerable = _recipeInMemoryDatabase
-                    .Where(r => r.Uuid == dto.Uuid)
+                    .Where(r => r.Id == dto.Id)
                     .Select(r => 
                     { 
                         r.Title = dto.Title; 
@@ -257,7 +257,7 @@ public class RecipeRepositoryTest
                     });
 
                 var test = _recipeInMemoryDatabase
-                    .Any(r => r.Uuid == dto.Uuid);
+                    .Any(r => r.Id == dto.Id);
 
                 return Task.FromResult(test ? 1 : 0);
             });
@@ -272,7 +272,7 @@ public class RecipeRepositoryTest
     {
         var recipeDto = new UpdateRecipeDto
         {
-            Uuid = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             Title = "Non existing recipe"
         };
 
@@ -280,7 +280,7 @@ public class RecipeRepositoryTest
             .Returns((UpdateRecipeDto dto) =>
             {
                 var enumerable = _recipeInMemoryDatabase
-                    .Where(r => r.Uuid == dto.Uuid)
+                    .Where(r => r.Id == dto.Id)
                     .Select(r => 
                     { 
                         r.Title = dto.Title; 
@@ -288,7 +288,7 @@ public class RecipeRepositoryTest
                     });
 
                 var test = _recipeInMemoryDatabase
-                    .Any(r => r.Uuid == dto.Uuid);
+                    .Any(r => r.Id == dto.Id);
 
                 return Task.FromResult(test ? 1 : 0);
             });
@@ -302,20 +302,20 @@ public class RecipeRepositoryTest
     public async Task DeleteRecipe_Returns1_WhenRecipeIsDeleted()
     {
         var recipeToDelete = _recipeInMemoryDatabase.First();
-        var uuid = recipeToDelete.Uuid;
+        var id = recipeToDelete.Id;
 
-        _recipeRepositoryMock.Setup(r => r.DeleteRecipe(uuid))
-            .Returns((Guid recipeUuid) =>
+        _recipeRepositoryMock.Setup(r => r.DeleteRecipe(id))
+            .Returns((Guid recipeId) =>
             {
                 var recipes = _recipeInMemoryDatabase
-                    .Where(r => r.Uuid == recipeUuid).ToList();
+                    .Where(r => r.Id == recipeId).ToList();
                 
-                var test = recipes.RemoveAll(r => r.Uuid == recipeUuid);
+                var test = recipes.RemoveAll(r => r.Id == recipeId);
 
                 return Task.FromResult(test == 1 ? 1 : 0);
             });
 
-        var result = await _recipeRepositoryMock.Object.DeleteRecipe(uuid);
+        var result = await _recipeRepositoryMock.Object.DeleteRecipe(id);
 
         result.Should().Be(1);
     }
@@ -323,20 +323,20 @@ public class RecipeRepositoryTest
     [Fact]
     public async Task DeleteRecipe_Returns0_WhenRecipeDoesNotExist()
     {
-        var uuid = Guid.NewGuid();
+        var id = Guid.NewGuid();
     
-        _recipeRepositoryMock.Setup(r => r.DeleteRecipe(uuid))
-            .Returns((Guid recipeUuid) =>
+        _recipeRepositoryMock.Setup(r => r.DeleteRecipe(id))
+            .Returns((Guid recipeId) =>
             {
                 var recipes = _recipeInMemoryDatabase
-                    .Where(r => r.Uuid == recipeUuid).ToList();
+                    .Where(r => r.Id == recipeId).ToList();
 
-                var test = recipes.RemoveAll(r => r.Uuid == uuid);
+                var test = recipes.RemoveAll(r => r.Id == id);
     
                 return Task.FromResult(test == 1 ? 1 : 0);
             });
     
-        var result = await _recipeRepositoryMock.Object.DeleteRecipe(uuid);
+        var result = await _recipeRepositoryMock.Object.DeleteRecipe(id);
     
         result.Should().Be(0);
     }
