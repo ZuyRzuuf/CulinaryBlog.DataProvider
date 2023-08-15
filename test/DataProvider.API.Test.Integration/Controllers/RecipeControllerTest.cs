@@ -138,17 +138,25 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     {
         var recipesList = await _fixture.RecipeRepository.GetRecipes();
         var recipeToGet = recipesList.First();
-        
         var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
         var result = await recipeController.GetRecipeById(recipeToGet.Id);
-        var data = (OkObjectResult)result;
+        var objectResult = result as ObjectResult;
+        
+        if (objectResult?.StatusCode == 200)
+        {
+            var data = (OkObjectResult)result;
 
-        result.Should()
-            .BeOfType<OkObjectResult>()
-            .And
-            .BeAssignableTo<OkObjectResult>();
-        data.StatusCode.Should().Be(200);
-        data.Value.Should().BeEquivalentTo(recipeToGet);
+            result.Should()
+                .BeOfType<OkObjectResult>()
+                .And
+                .BeAssignableTo<OkObjectResult>();
+            data.StatusCode.Should().Be(200);
+            data.Value.Should().BeEquivalentTo(recipeToGet);
+        }
+        else
+        {
+            Assert.Fail($"Expected 200 OK but got {objectResult?.StatusCode} instead.");
+        }
     }
     
     [Fact]
@@ -253,13 +261,19 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
         
         var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
         var result = await recipeController.DeleteRecipe(recipeToDelete.Id);
-        var data = (NoContentResult)result;
-    
-        result.Should()
-            .BeOfType<NoContentResult>()
-            .And
-            .BeAssignableTo<NoContentResult>();
-        data.StatusCode.Should().Be(204);
+        
+        if(result is NoContentResult noContentResult)
+        {
+            noContentResult.Should()
+                .BeOfType<NoContentResult>()
+                .And
+                .BeAssignableTo<NoContentResult>();
+            noContentResult.StatusCode.Should().Be(204);
+        }
+        else
+        {
+            Assert.Fail($"Expected 204 No Content but got {result.GetType().Name} instead.");
+        }
     }
     
     [Fact]
