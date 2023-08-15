@@ -194,7 +194,7 @@ public class RecipeRepositoryTest
     public async Task GetBasicRecipesById_ReturnsRecipe_WhenIdExists()
     {
         var recipeToGet = _basicRecipeInMemoryDatabase.First();
-        _recipeRepositoryMock.Setup(r => r.GetBasicRecipeById(recipeToGet.Id))
+        _recipeRepositoryMock.Setup(r => r.GetRecipeById(recipeToGet.Id))
             .Returns((Guid id) =>
             {
                 var recipe = _basicRecipeInMemoryDatabase
@@ -204,7 +204,7 @@ public class RecipeRepositoryTest
             });
                 
 
-        var actual = await _recipeRepositoryMock.Object.GetBasicRecipeById(recipeToGet.Id);
+        var actual = await _recipeRepositoryMock.Object.GetRecipeById(recipeToGet.Id);
 
         using (new AssertionScope())
         {
@@ -219,7 +219,7 @@ public class RecipeRepositoryTest
     {
         var recipeToGet = Guid.NewGuid();
         
-        _recipeRepositoryMock.Setup(r => r.GetBasicRecipeById(recipeToGet))
+        _recipeRepositoryMock.Setup(r => r.GetRecipeById(recipeToGet))
             .Returns((Guid id) =>
             {
                 var recipe = _basicRecipeInMemoryDatabase
@@ -228,7 +228,7 @@ public class RecipeRepositoryTest
                 return Task.FromResult(recipe)!;
             });
 
-        var actual = await _recipeRepositoryMock.Object.GetBasicRecipeById(recipeToGet);
+        var actual = await _recipeRepositoryMock.Object.GetRecipeById(recipeToGet);
 
         actual.Should().BeNull();
     }

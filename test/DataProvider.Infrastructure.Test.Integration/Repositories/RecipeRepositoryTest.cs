@@ -129,13 +129,13 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
     }
     
     [Fact]
-    public async Task GetBasicRecipeById_ReturnsRecipe_WhenRecipeExists()
+    public async Task GetRecipeById_ReturnsRecipe_WhenRecipeExists()
     {
         var sut = _fixture.Sut;
         var recipes = await sut.GetRecipes();
         var recipeToGet = recipes.First();
 
-        var result = await sut.GetBasicRecipeById(recipeToGet.Id);
+        var result = await sut.GetRecipeById(recipeToGet.Id);
     
         result.Should()
             .NotBeNull()
@@ -147,21 +147,21 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
     }
     
     [Fact]
-    public async Task GetBasicRecipeById_ThrowsRecipeDoesNotExistException_WhenRecipeDoesNotExist()
+    public async Task GetRecipeById_ThrowsRecipeDoesNotExistException_WhenRecipeDoesNotExist()
     {
         var sut = _fixture.Sut;
 
         await sut.Invoking(r => r
-            .GetBasicRecipeById(Guid.NewGuid())).Should().ThrowAsync<RecipeDoesNotExistException>();
+            .GetRecipeById(Guid.NewGuid())).Should().ThrowAsync<RecipeDoesNotExistException>();
     }
     
     [Fact]
-    public async Task GetBasicRecipeById_ThrowsDatabaseConnectionProblemException_WhenDatabaseReturnsException()
+    public async Task GetRecipeById_ThrowsDatabaseConnectionProblemException_WhenDatabaseReturnsException()
     {
         var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
     
         await sut.Invoking(r => r
-            .GetBasicRecipeById(Guid.NewGuid())).Should().ThrowAsync<UnknownDatabaseException>();
+            .GetRecipeById(Guid.NewGuid())).Should().ThrowAsync<UnknownDatabaseException>();
     }
 
     [Fact]

@@ -91,12 +91,12 @@ public class RecipeController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Recipe))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetBasicRecipeById(Guid id)
+    public async Task<IActionResult> GetRecipeById(Guid id)
     {
         try
         {
-            var recipe = await _recipeRepository.GetBasicRecipeById(id); 
-            _logger.LogInformation("[DP]: GetBasicRecipeById returns {@Recipe}", recipe);
+            var recipe = await _recipeRepository.GetRecipeById(id); 
+            _logger.LogInformation("[DP]: GetRecipeById returns {@Recipe}", recipe);
         
             if (recipe == null)
             {

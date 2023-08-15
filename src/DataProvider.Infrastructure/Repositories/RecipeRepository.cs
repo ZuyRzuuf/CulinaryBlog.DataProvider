@@ -130,7 +130,7 @@ public class RecipeRepository : IRecipeRepository
     }
 
     /// <inheritdoc />
-    public async Task<Recipe> GetBasicRecipeById(Guid id)
+    public async Task<Recipe> GetRecipeById(Guid id)
     {
         try
         {
