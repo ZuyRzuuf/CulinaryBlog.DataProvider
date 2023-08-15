@@ -115,11 +115,11 @@ public class RecipeControllerTest
     }
     
     [Fact]
-    public async Task GetRecipeById_Returns_OkObjectResult()
+    public async Task GetRecipeWithIngredientsById_Returns_OkObjectResult()
     {
         var recipeToGet = _recipeInMemoryDatabase.First();
 
-        _recipeRepositoryMock.Setup(r => r.GetRecipeById(recipeToGet.Id))
+        _recipeRepositoryMock.Setup(r => r.GetRecipeWithIngredientsById(recipeToGet.Id))
             .Returns((Guid id) =>
             {
                 var recipe = _recipeInMemoryDatabase
@@ -128,7 +128,7 @@ public class RecipeControllerTest
                 return Task.FromResult(recipe)!;
             });
 
-        var response = await _recipeController.GetRecipeById(recipeToGet.Id);
+        var response = await _recipeController.GetRecipeWithIngredientsById(recipeToGet.Id);
     
         using (new AssertionScope())
         {
@@ -138,11 +138,11 @@ public class RecipeControllerTest
     }
     
     [Fact]
-    public async Task GetRecipeById_ReturnsRecipe_WhenIdExists()
+    public async Task GetRecipeWithIngredientsById_ReturnsRecipe_WhenIdExists()
     {
         var recipeToGet = _recipeInMemoryDatabase.First();
 
-        _recipeRepositoryMock.Setup(r => r.GetRecipeById(recipeToGet.Id))
+        _recipeRepositoryMock.Setup(r => r.GetRecipeWithIngredientsById(recipeToGet.Id))
             .Returns((Guid id) =>
             {
                 var recipe = _recipeInMemoryDatabase
@@ -151,7 +151,7 @@ public class RecipeControllerTest
                 return Task.FromResult(recipe)!;
             });
         
-        var response = await _recipeController.GetRecipeById(recipeToGet.Id);
+        var response = await _recipeController.GetRecipeWithIngredientsById(recipeToGet.Id);
         var result = Assert.IsType<OkObjectResult>(response);
         var recipe = (RecipeQuery)result.Value!;
 
@@ -159,9 +159,9 @@ public class RecipeControllerTest
     }
     
     [Fact]
-    public async Task GetRecipeById_ReturnsStatusCode404_WhenIdDoesNotExist()
+    public async Task GetRecipeWithIngredientsById_ReturnsStatusCode404_WhenIdDoesNotExist()
     {
-        _recipeRepositoryMock.Setup(r => r.GetRecipeById(Guid.NewGuid()))
+        _recipeRepositoryMock.Setup(r => r.GetRecipeWithIngredientsById(Guid.NewGuid()))
             .Returns((Guid id) =>
             {
                 var recipe = _recipeInMemoryDatabase
@@ -170,7 +170,7 @@ public class RecipeControllerTest
                 return Task.FromResult(recipe)!;
             });
         
-        var response = await _recipeController.GetRecipeById(Guid.NewGuid());
+        var response = await _recipeController.GetRecipeWithIngredientsById(Guid.NewGuid());
         var result = (ObjectResult)response;
 
         result.StatusCode.Should().Be(404);

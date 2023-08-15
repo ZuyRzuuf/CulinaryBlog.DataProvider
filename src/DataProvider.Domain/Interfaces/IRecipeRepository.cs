@@ -9,7 +9,7 @@ public interface IRecipeRepository
     public Task<IList<Recipe>> GetRecipes();
     public Task<IList<Recipe>> GetRecipesByTitle(string partialTitle);
     public Task<IList<Recipe>> GetBasicRecipesByTitle(string partialTitle);
-    public Task<RecipeQuery?> GetRecipeById(Guid id);
+    public Task<RecipeQuery?> GetRecipeWithIngredientsById(Guid id);
     public Task<Recipe> GetBasicRecipeById(Guid id);
     public Task<Recipe> CreateRecipe(CreateRecipeDto createRecipeDto);
     public Task<int> UpdateRecipe(UpdateRecipeDto updateRecipeDto);

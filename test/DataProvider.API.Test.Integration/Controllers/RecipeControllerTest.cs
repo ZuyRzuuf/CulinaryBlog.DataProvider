@@ -134,12 +134,12 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     }
 
     [Fact]
-    public async Task GetRecipeById_ReturnsRecipe_WhenIdExists()
+    public async Task GetRecipeWithIngredientsById_ReturnsRecipe_WhenIdExists()
     {
         var recipesList = await _fixture.RecipeRepository.GetRecipes();
         var recipeToGet = recipesList.First();
         var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
-        var result = await recipeController.GetRecipeById(recipeToGet.Id);
+        var result = await recipeController.GetRecipeWithIngredientsById(recipeToGet.Id);
         var objectResult = result as ObjectResult;
         
         if (objectResult?.StatusCode == 200)
@@ -164,7 +164,7 @@ public class RecipeControllerTest : IClassFixture<RecipeControllerFixture>
     {
         var recipeController = new RecipeController(_fixture.RecipeRepository, _fixture.RecipeControllerLogger);
     
-        var result = await recipeController.GetRecipeById(Guid.NewGuid());
+        var result = await recipeController.GetRecipeWithIngredientsById(Guid.NewGuid());
         var data = (ObjectResult)result;
         
         result.Should()

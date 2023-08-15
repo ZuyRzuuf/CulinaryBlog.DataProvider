@@ -52,7 +52,7 @@ public class RecipeRepository : IRecipeRepository
         throw new NotImplementedException();
     }
 
-    public async Task<RecipeQuery?> GetRecipeById(Guid id)
+    public async Task<RecipeQuery?> GetRecipeWithIngredientsById(Guid id)
     {
         try
         {
