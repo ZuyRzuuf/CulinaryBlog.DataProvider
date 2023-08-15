@@ -7,6 +7,7 @@ using FluentAssertions.Execution;
 using MySql.Data.MySqlClient;
 using DataProvider.Domain.Dto;
 using DataProvider.Domain.Entities;
+using DataProvider.Domain.Queries;
 using DataProvider.Infrastructure.Exceptions;
 using DataProvider.Infrastructure.Repositories;
 using DataProvider.Infrastructure.Test.Integration.Fixtures;
@@ -128,27 +129,64 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
     }
     
     [Fact]
-    public async Task GetRecipeById_ReturnsRecipe_WhenRecipeExists()
+    public async Task GetBasicRecipeById_ReturnsRecipe_WhenRecipeExists()
     {
         var sut = _fixture.Sut;
         var recipes = await sut.GetRecipes();
         var recipeToGet = recipes.First();
 
-        var result = await sut.GetRecipeById(recipeToGet.Id);
+        var result = await sut.GetBasicRecipeById(recipeToGet.Id);
     
         result.Should()
             .NotBeNull()
             .And
             .BeOfType<Recipe>()
             .And
-            .BeEquivalentTo(recipeToGet);
+            .BeEquivalentTo(recipeToGet)
+            ;
+    }
+    
+    [Fact]
+    public async Task GetBasicRecipeById_ThrowsRecipeDoesNotExistException_WhenRecipeDoesNotExist()
+    {
+        var sut = _fixture.Sut;
+
+        await sut.Invoking(r => r
+            .GetBasicRecipeById(Guid.NewGuid())).Should().ThrowAsync<RecipeDoesNotExistException>();
+    }
+    
+    [Fact]
+    public async Task GetBasicRecipeById_ThrowsDatabaseConnectionProblemException_WhenDatabaseReturnsException()
+    {
+        var sut = new RecipeRepository(_fixture.MysqlTestContextWithoutSchema, _fixture.Logger);
+    
+        await sut.Invoking(r => r
+            .GetBasicRecipeById(Guid.NewGuid())).Should().ThrowAsync<UnknownDatabaseException>();
+    }
+
+    [Fact]
+    public async Task GetRecipeById_ReturnsRecipe_WhenRecipeExists()
+    {
+        var sut = _fixture.Sut;
+        var recipes = await sut.GetRecipes();
+        var recipeToGet = recipes.First();
+    
+        var result = await sut.GetRecipeById(recipeToGet.Id);
+    
+        result.Should()
+            .NotBeNull()
+            .And
+            .BeOfType<RecipeQuery>()
+            .And
+            .BeEquivalentTo(recipeToGet)
+            ;
     }
     
     [Fact]
     public async Task GetRecipeById_ThrowsRecipeDoesNotExistException_WhenRecipeDoesNotExist()
     {
         var sut = _fixture.Sut;
-
+    
         await sut.Invoking(r => r
             .GetRecipeById(Guid.NewGuid())).Should().ThrowAsync<RecipeDoesNotExistException>();
     }
@@ -284,7 +322,7 @@ public class RecipeRepositoryTest : IClassFixture<RecipeRepositoryFixture>
     
         var response = await sut.DeleteRecipe(recipeToDelete.Id);
     
-        response.Should().Be(1);
+        response.Should().BeGreaterThan(1);
     }
     
     [Fact]

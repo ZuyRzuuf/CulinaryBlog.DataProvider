@@ -8,7 +8,7 @@ namespace DataProvider.API.Test.Integration.Database.TestData;
 
 public record RecipesDataCollection
 {
-    public const int ItemsNumber = 10;
+    private const int ItemsNumber = 10;
 
     public static List<Recipe> Recipes => new Faker<Recipe>()
             .RuleFor(r => r.Id, f => Guid.NewGuid())

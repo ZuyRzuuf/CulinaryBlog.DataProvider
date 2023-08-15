@@ -1,7 +1,7 @@
 namespace DataProvider.Domain.Entities;
 
-public class Recipe
+public record Recipe
 {
-    public Guid Id { get; set; }
-    public string? Title { get; set; } = null!;
+    public Guid Id { get; init; }
+    public string? Title { get; set; }
 }

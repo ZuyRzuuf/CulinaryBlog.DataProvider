@@ -11,6 +11,7 @@ using DataProvider.API.Controllers;
 using DataProvider.Domain.Dto;
 using DataProvider.Domain.Entities;
 using DataProvider.Domain.Interfaces;
+using DataProvider.Domain.Queries;
 using Xunit;
 
 namespace DataProvider.API.Test.Unit.Controllers;
@@ -19,18 +20,67 @@ public class RecipeControllerTest
 {
     private readonly RecipeController _recipeController;
     private readonly Mock<IRecipeRepository> _recipeRepositoryMock;
-    private readonly IList<Recipe> _recipeInMemoryDatabase;
+    private readonly IList<Recipe> _basicRecipeInMemoryDatabase;
+    private readonly IList<RecipeQuery> _recipeInMemoryDatabase;
     
     public RecipeControllerTest()
     {
         _recipeRepositoryMock = new Mock<IRecipeRepository>();
         var loggerMock = new Mock<ILogger<RecipeController>>();
         _recipeController = new RecipeController(_recipeRepositoryMock.Object, loggerMock.Object);
-        _recipeInMemoryDatabase = new List<Recipe>
+        _basicRecipeInMemoryDatabase = new List<Recipe>
         {
-            new() {Id = Guid.Parse("ab24fde6-495b-45b6-be3c-1343939b646a"), Title = "Recipe 1"},
-            new() {Id = Guid.Parse("fe0efe1e-eab7-4ca4-a059-e51de04b0eed"), Title = "Recipe 2"},
-            new() {Id = Guid.Parse("a4f5ceb4-3d74-444f-a05f-57e8cfd42061"), Title = "Recipe 3"}
+            new()
+            {
+                Id = Guid.Parse("ab24fde6-495b-45b6-be3c-1343939b646a"), 
+                Title = "Recipe 1"
+            },
+            new()
+            {
+                Id = Guid.Parse("fe0efe1e-eab7-4ca4-a059-e51de04b0eed"), 
+                Title = "Recipe 2"
+            },
+            new()
+            {
+                Id = Guid.Parse("a4f5ceb4-3d74-444f-a05f-57e8cfd42061"), 
+                Title = "Recipe 3"
+            }
+        };
+        _recipeInMemoryDatabase = new List<RecipeQuery>
+        {
+            new()
+            {
+                Id = Guid.Parse("ab24fde6-495b-45b6-be3c-1343939b646a"), 
+                Title = "Recipe 1",
+                Ingredients = new List<IngredientQuery>
+                {
+                    new() {Name = "Ingredient 1", Description = "Description 1", Quantity = 10, QuantityType = "g"},
+                    new() {Name = "Ingredient 2", Description = "Description 2", Quantity = 5, QuantityType = "szt"},
+                    new() {Name = "Ingredient 3", Description = "Description 3", Quantity = 1, QuantityType = "l"}
+                },
+            },
+            new()
+            {
+                Id = Guid.Parse("fe0efe1e-eab7-4ca4-a059-e51de04b0eed"), 
+                Title = "Recipe 2",
+                Ingredients = new List<IngredientQuery>
+                {
+                    new() {Name = "Ingredient 4", Description = "Description 4", Quantity = 10, QuantityType = "g"},
+                    new() {Name = "Ingredient 5", Description = "Description 5", Quantity = 5, QuantityType = "szt"},
+                    new() {Name = "Ingredient 6", Description = "Description 6", Quantity = 1, QuantityType = "l"}
+                },
+            },
+            new()
+            {
+                Id = Guid.Parse("a4f5ceb4-3d74-444f-a05f-57e8cfd42061"), 
+                Title = "Recipe 3",
+                Ingredients = new List<IngredientQuery>
+                {
+                    new() {Name = "Ingredient 7", Description = "Description 7", Quantity = 10, QuantityType = "g"},
+                    new() {Name = "Ingredient 8", Description = "Description 8", Quantity = 5, QuantityType = "szt"},
+                    new() {Name = "Ingredient 9", Description = "Description 9", Quantity = 1, QuantityType = "l"}
+                },
+            }
         };
     }
     
@@ -50,7 +100,7 @@ public class RecipeControllerTest
     public async Task GetRecipes_Returns_ListOfRecipes()
     {
         _recipeRepositoryMock.Setup(r => r.GetRecipes())
-            .ReturnsAsync(_recipeInMemoryDatabase);
+            .ReturnsAsync(_basicRecipeInMemoryDatabase);
         
         var response = await _recipeController.GetRecipes();
         var result = Assert.IsType<OkObjectResult>(response);
@@ -103,7 +153,7 @@ public class RecipeControllerTest
         
         var response = await _recipeController.GetRecipeById(recipeToGet.Id);
         var result = Assert.IsType<OkObjectResult>(response);
-        var recipe = (Recipe)result.Value!;
+        var recipe = (RecipeQuery)result.Value!;
 
         recipe.Should().BeEquivalentTo(recipeToGet);
     }
@@ -131,13 +181,13 @@ public class RecipeControllerTest
     {
         const string recipesToFind = "recipe to get";
         
-        _recipeInMemoryDatabase.Add(new Recipe() { Title = "First recipe to get", Id = Guid.NewGuid() });
-        _recipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Id = Guid.NewGuid() });
+        _basicRecipeInMemoryDatabase.Add(new Recipe() { Title = "First recipe to get", Id = Guid.NewGuid() });
+        _basicRecipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Id = Guid.NewGuid() });
 
         _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipesToFind))
             .Returns((string partialTitle) =>
             {
-                var recipeInMemoryDatabase = _recipeInMemoryDatabase as List<Recipe>;
+                var recipeInMemoryDatabase = _basicRecipeInMemoryDatabase as List<Recipe>;
                 
                 var recipe = recipeInMemoryDatabase!
                     .Where(r => r.Title!.Contains(partialTitle))
@@ -168,13 +218,13 @@ public class RecipeControllerTest
 
         var recipeToFind = new Recipe() { Title = "First recipe to get", Id = Guid.NewGuid() };
         
-        _recipeInMemoryDatabase.Add(recipeToFind);
-        _recipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Id = Guid.NewGuid() });
+        _basicRecipeInMemoryDatabase.Add(recipeToFind);
+        _basicRecipeInMemoryDatabase.Add(new Recipe() { Title = "Second recipe to get", Id = Guid.NewGuid() });
 
         _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipeTitleToFind))
             .Returns((string partialTitle) =>
             {
-                var recipeInMemoryDatabase = _recipeInMemoryDatabase as List<Recipe>;
+                var recipeInMemoryDatabase = _basicRecipeInMemoryDatabase as List<Recipe>;
                 
                 var recipe = recipeInMemoryDatabase!
                     .Where(r => r.Title!.Contains(partialTitle))
@@ -205,7 +255,7 @@ public class RecipeControllerTest
         _recipeRepositoryMock.Setup(r => r.GetRecipesByTitle(recipeTitleToFind))
             .Returns((string partialTitle) =>
             {
-                var recipeInMemoryDatabase = _recipeInMemoryDatabase as List<Recipe>;
+                var recipeInMemoryDatabase = _basicRecipeInMemoryDatabase as List<Recipe>;
                 
                 var recipe = recipeInMemoryDatabase!
                     .Where(r => r.Title!.Contains(partialTitle))
@@ -245,7 +295,7 @@ public class RecipeControllerTest
                     Title = dto.Title
                 };
                 
-                _recipeInMemoryDatabase.Add(recipe);
+                _basicRecipeInMemoryDatabase.Add(recipe);
 
                 return Task.FromResult(recipe);
             });
@@ -277,7 +327,7 @@ public class RecipeControllerTest
                     Title = dto.Title
                 };
                 
-                _recipeInMemoryDatabase.Add(recipe);
+                _basicRecipeInMemoryDatabase.Add(recipe);
 
                 return Task.FromResult(recipe);
             });

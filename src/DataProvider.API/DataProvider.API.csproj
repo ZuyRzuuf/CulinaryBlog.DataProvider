@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AssemblyName>DataProvider.API</AssemblyName>
@@ -10,6 +10,7 @@
         <Authors>DataProvider.API</Authors>
         <Company>DataProvider.API</Company>
         <Product>DataProvider.API</Product>
+        <LangVersion>11</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

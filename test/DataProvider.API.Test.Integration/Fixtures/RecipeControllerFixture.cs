@@ -49,9 +49,22 @@ public class RecipeControllerFixture : DatabaseSetupFixture, IDisposable
 
     private async Task AddRecipesData()
     {
-        const string query = "INSERT INTO recipe (id, title) VALUES (@Id, @Title)";
+        const string recipeQuery = "INSERT INTO recipe (id, title) VALUES (@Id, @Title)";
+        const string ingredientQuery = """
+           INSERT INTO recipe_ingredient
+               (id, recipe_id, name, description, quantity, quantity_type)
+           VALUES (@Id, @RecipeId, @Name, @Description, @Quantity, @QuantityType)
+       """;
+
+        var recipeIngredients = new List<Ingredient>();
+
+        foreach (var recipe in RecipesCollection)
+        {
+            recipeIngredients.AddRange(new RecipeIngredientsDataCollection(recipe.Id).Ingredients);
+        }
 
         await using var connection = new MySqlConnection(ConnectionStringToSchema);
-        await connection.ExecuteAsync(query, RecipesCollection);
+        await connection.ExecuteAsync(recipeQuery, RecipesCollection);
+        await connection.ExecuteAsync(ingredientQuery, recipeIngredients);
     }
 }

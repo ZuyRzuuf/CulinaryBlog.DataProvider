@@ -5,6 +5,7 @@ using MySql.Data.MySqlClient;
 using DataProvider.Domain.Dto;
 using DataProvider.Domain.Entities;
 using DataProvider.Domain.Interfaces;
+using DataProvider.Domain.Queries;
 using DataProvider.Infrastructure.Database;
 using DataProvider.Infrastructure.Exceptions;
 
@@ -21,6 +22,7 @@ public class RecipeRepository : IRecipeRepository
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task<IList<Recipe>> GetRecipes()
     {
         try
@@ -44,11 +46,101 @@ public class RecipeRepository : IRecipeRepository
         }
     }
 
-    public async Task<Recipe> GetRecipeById(Guid id)
+    /// <inheritdoc />
+    public async Task<IList<Recipe>> GetBasicRecipesByTitle(string partialTitle)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<RecipeQuery?> GetRecipeById(Guid id)
     {
         try
         {
-            const string query = "SELECT * FROM recipe WHERE id = @Id";
+            const string query = @"
+                SELECT 
+                    r.id,
+                    r.title,
+                    ri.name,
+                    ri.description,
+                    ri.quantity,
+                    ri.quantity_type as quantityType
+                FROM recipe r
+                JOIN recipe_ingredient ri ON r.id = ri.recipe_id
+                WHERE r.id = @Id
+            ";
+
+            var parameters = new DynamicParameters();
+            
+            parameters.Add("Id", id, DbType.Guid);
+
+            using var connection = _mysqlContext.CreateConnection();
+
+            var recipeIngredientsList = new Dictionary<Guid, RecipeQuery>();
+            var result = 
+                await connection.QueryAsync<RecipeQuery, IngredientQuery, RecipeQuery>(
+                    query,
+                    (recipe, ingredient) =>
+                    {
+                        if (!recipeIngredientsList.TryGetValue(recipe.Id, out var recipeQuery))
+                        {
+                            recipeQuery = recipe;
+                            recipeQuery.Ingredients = new List<IngredientQuery>();
+                            recipeIngredientsList.Add(recipeQuery.Id, recipeQuery);
+                        }
+            
+                        if (ingredient == null) return recipeQuery;
+                        
+                        if (recipeQuery.Ingredients is List<IngredientQuery> ingredientList)
+                        {
+                            ingredientList.Add(ingredient);
+                        }
+                        else
+                        {
+                            recipeQuery.Ingredients = new List<IngredientQuery> {ingredient};
+                        }
+            
+                        return recipeQuery;
+                    },
+                    parameters,
+                    splitOn: "name"
+                    );
+            
+            var recipe = result.Distinct().ToList().FirstOrDefault();
+            
+            if (recipe == null)
+                throw new RecipeDoesNotExistException();
+
+            return recipe;
+        }
+        catch (RecipeDoesNotExistException e)
+        {
+            _logger.LogError(e.InnerException, "Recipe '{@Id}' doesn't exist", id);
+            throw;
+        }
+        catch (MySqlException e)
+        {
+            _logger.LogError(e.InnerException, "Unknown database");
+            throw new UnknownDatabaseException(e.Message, e.InnerException);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Problem with database connection occurs");
+            throw new DatabaseConnectionProblemException(e.Message, e.InnerException);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<Recipe> GetBasicRecipeById(Guid id)
+    {
+        try
+        {
+            const string query = @"
+                SELECT 
+                    r.id,
+                    r.title
+                FROM recipe AS r
+                WHERE r.id = @Id
+            ";
 
             var parameters = new DynamicParameters();
             
@@ -192,7 +284,10 @@ public class RecipeRepository : IRecipeRepository
     {
         try
         {
-            const string query = "DELETE FROM recipe WHERE id = @Id";
+            const string query = """
+                DELETE FROM recipe_ingredient WHERE recipe_id = @Id;
+                DELETE FROM recipe WHERE id = @Id
+            """;
 
             var parameters = new DynamicParameters();
             parameters.Add("Id", id, DbType.Guid);
@@ -201,9 +296,12 @@ public class RecipeRepository : IRecipeRepository
 
             var result = await connection.ExecuteAsync(query, parameters);
 
-            if (result == 1) return result;
-            
-            throw new RecipeDoesNotExistException();
+            return result switch
+            {
+                > 1 => result,
+                1 => throw new InconsistentDatabaseOperationException(),
+                _ => throw new RecipeDoesNotExistException()
+            };
         }
         catch (RecipeDoesNotExistException e)
         {

@@ -27,13 +27,13 @@ public class RecipeController : ControllerBase
         try
         {
             var recipes = await _recipeRepository.GetRecipes(); 
-            _logger.LogInformation("GetRecipes returns {@Recipes}", recipes);
+            _logger.LogInformation("[DP]: GetRecipes returns {@Recipes}", recipes);
         
             return Ok(recipes);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Communication with repository failed");
+            _logger.LogError(e, "[DP]: Communication with repository failed");
             return StatusCode(500, e.Message);
         }
     }
@@ -46,13 +46,13 @@ public class RecipeController : ControllerBase
         try
         {
             var recipes = await _recipeRepository.GetRecipesByTitle(partialTitle);
-            _logger.LogInformation("GetRecipesByTitle returns {@Recipes}", recipes);
+            _logger.LogInformation("[DP]: GetRecipesByTitle returns {@Recipes}", recipes);
 
             return Ok(recipes);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Communication with repository failed");
+            _logger.LogError(e, "[DP]: Communication with repository failed");
             return StatusCode(500, e.Message);
         }
     }
@@ -66,7 +66,7 @@ public class RecipeController : ControllerBase
         try
         {
             var recipe = await _recipeRepository.GetRecipeById(id); 
-            _logger.LogInformation("GetRecipeById returns {@Recipe}", recipe);
+            _logger.LogInformation("[DP]: GetRecipeById returns {@Recipe}", recipe);
         
             if (recipe == null)
             {
@@ -77,12 +77,42 @@ public class RecipeController : ControllerBase
         }
         catch (RecipeDoesNotExistException e)
         {
-            _logger.LogError(e.InnerException, "Recipe '{@RecipeId}' does not exist", id);
+            _logger.LogError(e.InnerException, "[DP]: Recipe '{@RecipeId}' does not exist", id);
             return StatusCode(404, $"Recipe '{id}' does not exist");
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Communication with repository failed");
+            _logger.LogError(e, "[DP]: Communication with repository failed");
+            return StatusCode(500, e.Message);
+        }
+    }
+
+    [HttpGet("{id:guid}/basic-info")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Recipe))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetBasicRecipeById(Guid id)
+    {
+        try
+        {
+            var recipe = await _recipeRepository.GetBasicRecipeById(id); 
+            _logger.LogInformation("[DP]: GetBasicRecipeById returns {@Recipe}", recipe);
+        
+            if (recipe == null)
+            {
+                throw new RecipeDoesNotExistException();
+            }
+    
+            return Ok(recipe);
+        }
+        catch (RecipeDoesNotExistException e)
+        {
+            _logger.LogError(e.InnerException, "[DP]: Recipe '{@RecipeId}' does not exist", id);
+            return StatusCode(404, $"Recipe '{id}' does not exist");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[DP]: Communication with repository failed");
             return StatusCode(500, e.Message);
         }
     }
@@ -95,7 +125,7 @@ public class RecipeController : ControllerBase
         try
         {
             var recipe = await _recipeRepository.CreateRecipe(recipeDto);
-            _logger.LogInformation("CreateRecipe gets {@Dto} returns {@Recipe}", recipeDto, recipe);
+            _logger.LogInformation("[DP]: CreateRecipe gets {@Dto} returns {@Recipe}", recipeDto, recipe);
 
             return CreatedAtAction(
                 nameof(GetRecipes), 
@@ -104,7 +134,7 @@ public class RecipeController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Communication with repository failed");
+            _logger.LogError(e, "[DP]: Communication with repository failed");
             return StatusCode(500, e.Message);
         }
     }
@@ -124,17 +154,17 @@ public class RecipeController : ControllerBase
                 throw new RecipeDoesNotExistException();
             }
             
-            _logger.LogInformation("Updated recipe {@Title}", recipeDto.Title);
+            _logger.LogInformation("[DP]: Updated recipe {@Title}", recipeDto.Title);
             return NoContent();
         }
         catch (RecipeDoesNotExistException e)
         {
-            _logger.LogError(e.InnerException, "Recipe '{@RecipeId}' does not exist", recipeDto.Id);
+            _logger.LogError(e.InnerException, "[DP]: Recipe '{@RecipeId}' does not exist", recipeDto.Id);
             return StatusCode(404, $"Recipe '{recipeDto.Id}' does not exist");
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Communication with repository failed");
+            _logger.LogError(e, "[DP]: Communication with repository failed");
             return StatusCode(500, e.Message);
         }
     }
@@ -156,12 +186,12 @@ public class RecipeController : ControllerBase
         }
         catch (RecipeDoesNotExistException e)
         {
-            _logger.LogError(e.InnerException, "Recipe '{@Id}' does not exist", id);
+            _logger.LogError(e.InnerException, "[DP]: Recipe '{@Id}' does not exist", id);
             return StatusCode(404, $"Recipe '{id}' does not exist");
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Communication with repository failed");
+            _logger.LogError(e, "[DP]: Communication with repository failed");
             return StatusCode(500, e.Message);
         }
     }
