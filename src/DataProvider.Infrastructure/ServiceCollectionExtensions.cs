@@ -9,6 +9,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
     {
+        Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+        
         services.AddSingleton<MysqlContext>();
         services.AddScoped<IRecipeRepository, RecipeRepository>();
         services.AddScoped<IIngredientRepository, IngredientRepository>();
