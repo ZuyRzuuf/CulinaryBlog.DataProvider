@@ -6,7 +6,7 @@ using Xunit;
 
 namespace DataProvider.Infrastructure.Test.Unit.Exceptions;
 
-public class BadConnectionStringExceptionTest
+public class BadConnectionStringExceptionTests
 {
     [Fact]
     public void BadConnectionStringException_ThrowsExceptionWithoutAnyMessage()

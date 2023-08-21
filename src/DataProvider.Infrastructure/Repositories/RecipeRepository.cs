@@ -52,6 +52,7 @@ public class RecipeRepository : IRecipeRepository
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public async Task<RecipeQuery?> GetRecipeWithIngredientsById(Guid id)
     {
         try
@@ -134,13 +135,13 @@ public class RecipeRepository : IRecipeRepository
     {
         try
         {
-            const string query = @"
-                SELECT 
-                    r.id,
-                    r.title
-                FROM recipe AS r
-                WHERE r.id = @Id
-            ";
+            const string query = """
+             SELECT
+                 r.id,
+                 r.title
+             FROM recipe AS r
+             WHERE r.id = @Id
+        """;
 
             var parameters = new DynamicParameters();
             
@@ -173,6 +174,7 @@ public class RecipeRepository : IRecipeRepository
         }
     }
 
+    /// <inheritdoc />
     public async Task<IList<Recipe>> GetRecipesByTitle(string partialTitle)
     {
         try
@@ -201,6 +203,7 @@ public class RecipeRepository : IRecipeRepository
         }
     }
 
+    /// <inheritdoc />
     public async Task<Recipe> CreateRecipe(CreateRecipeDto createRecipeDto)
     {
         try
@@ -242,6 +245,7 @@ public class RecipeRepository : IRecipeRepository
         }
     }
 
+    /// <inheritdoc />
     public async Task<int> UpdateRecipe(UpdateRecipeDto updateRecipeDto)
     {
         try

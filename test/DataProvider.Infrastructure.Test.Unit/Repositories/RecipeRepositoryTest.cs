@@ -191,7 +191,7 @@ public class RecipeRepositoryTest
     }
 
     [Fact]
-    public async Task GetBasicRecipesById_ReturnsRecipe_WhenIdExists()
+    public async Task GetRecipeById_ReturnsRecipe_WhenIdExists()
     {
         var recipeToGet = _basicRecipeInMemoryDatabase.First();
         _recipeRepositoryMock.Setup(r => r.GetRecipeById(recipeToGet.Id))
@@ -215,7 +215,7 @@ public class RecipeRepositoryTest
     }
 
     [Fact]
-    public async Task GetBasicRecipesById_ThrowsRecipeDoesNotExistException_WhenIdDoesNotExists()
+    public async Task GetRecipeById_ThrowsRecipeDoesNotExistException_WhenIdDoesNotExists()
     {
         var recipeToGet = Guid.NewGuid();
         
@@ -234,7 +234,7 @@ public class RecipeRepositoryTest
     }
 
     [Fact]
-    public async Task GetRecipesById_ReturnsRecipe_WhenIdExists()
+    public async Task GetRecipeWithIngredientsById_ReturnsRecipe_WhenIdExists()
     {
         var recipeToGet = _recipeInMemoryDatabase.First();
         
@@ -257,7 +257,7 @@ public class RecipeRepositoryTest
     }
     
     [Fact]
-    public async Task GetRecipesById_ThrowsRecipeDoesNotExistException_WhenIdDoesNotExists()
+    public async Task GetRecipeWithIngredientsById_ThrowsRecipeDoesNotExistException_WhenIdDoesNotExists()
     {
         var recipeToGet = Guid.NewGuid();
         

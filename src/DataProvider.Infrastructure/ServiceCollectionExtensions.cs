@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<MysqlContext>();
         services.AddScoped<IRecipeRepository, RecipeRepository>();
+        services.AddScoped<IIngredientRepository, IngredientRepository>();
 
         return services;
     }
