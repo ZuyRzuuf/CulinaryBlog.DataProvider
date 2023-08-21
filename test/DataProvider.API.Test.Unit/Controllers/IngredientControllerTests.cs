@@ -17,15 +17,14 @@ public class IngredientControllerTests
 {
     private readonly IngredientController _ingredientController;
     private readonly Mock<IIngredientRepository> _ingredientRepositoryMock;
-    private readonly Mock<ILogger<IngredientController>> _loggerMock;
-    private readonly IList<Ingredient> _ingredientsInMemoryDatabse;
-    
+    private readonly IList<Ingredient> _ingredientsInMemoryDatabase;
+
     public IngredientControllerTests()
     {
         _ingredientRepositoryMock = new Mock<IIngredientRepository>();
-        _loggerMock = new Mock<ILogger<IngredientController>>();
-        _ingredientController = new IngredientController(_ingredientRepositoryMock.Object, _loggerMock.Object);
-        _ingredientsInMemoryDatabse = new List<Ingredient>
+        Mock<ILogger<IngredientController>> loggerMock = new();
+        _ingredientController = new IngredientController(_ingredientRepositoryMock.Object, loggerMock.Object);
+        _ingredientsInMemoryDatabase = new List<Ingredient>
         {
             new Ingredient
             {
@@ -63,7 +62,7 @@ public class IngredientControllerTests
         // Arrange
         var recipeId = Guid.Parse("8b046154-8fb5-41c7-85cb-3c997b78c05a");
         _ingredientRepositoryMock.Setup(x => x.GetRecipeIngredientsByRecipeIdAsync(recipeId))
-            .ReturnsAsync(_ingredientsInMemoryDatabse.Where(x => x.RecipeId == recipeId).ToList());
+            .ReturnsAsync(_ingredientsInMemoryDatabase.Where(x => x.RecipeId == recipeId).ToList());
         
         // Act
         var result = await _ingredientController.GetRecipeIngredientsByRecipeId(recipeId);
