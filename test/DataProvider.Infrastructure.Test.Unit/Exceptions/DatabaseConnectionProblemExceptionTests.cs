@@ -6,7 +6,7 @@ using Xunit;
 
 namespace DataProvider.Infrastructure.Test.Unit.Exceptions;
 
-public class DatabaseConnectionProblemExceptionTest
+public class DatabaseConnectionProblemExceptionTests
 {
     [Fact]
     public void DatabaseConnectionProblemExceptionTest_ThrowsExceptionWithoutAnyMessage()
