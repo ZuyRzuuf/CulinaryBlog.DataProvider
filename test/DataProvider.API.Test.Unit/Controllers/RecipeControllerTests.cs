@@ -16,14 +16,14 @@ using Xunit;
 
 namespace DataProvider.API.Test.Unit.Controllers;
 
-public class RecipeControllerTest
+public class RecipeControllerTests
 {
     private readonly RecipeController _recipeController;
     private readonly Mock<IRecipeRepository> _recipeRepositoryMock;
     private readonly IList<Recipe> _basicRecipeInMemoryDatabase;
     private readonly IList<RecipeQuery> _recipeInMemoryDatabase;
     
-    public RecipeControllerTest()
+    public RecipeControllerTests()
     {
         _recipeRepositoryMock = new Mock<IRecipeRepository>();
         var loggerMock = new Mock<ILogger<RecipeController>>();
